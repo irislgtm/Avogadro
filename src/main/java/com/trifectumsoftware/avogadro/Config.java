@@ -13,5 +13,7 @@ public class Config {
 
     public static final ForgeConfigSpec.BooleanValue JEI_CATEGORY = BUILDER.define("jeiCategory", true);
 
+    public static final ForgeConfigSpec.BooleanValue CUBIC_ATOMS = BUILDER.define("cubicAtoms", false);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 }
