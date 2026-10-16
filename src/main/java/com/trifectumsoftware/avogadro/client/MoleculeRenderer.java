@@ -48,7 +48,7 @@ public final class MoleculeRenderer {
         pose.translate(x + size / 2f, y + size / 2f, 100);
 
         float mr = mol.radius();
-        float scale = (size * 0.55f) / (mr > 0.001f ? mr : 1f);
+        float scale = (size * 0.45f) / (mr > 0.001f ? mr : 1f);
         pose.scale(scale, -scale, scale);
 
         pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(15f));
