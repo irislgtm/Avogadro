@@ -36,7 +36,7 @@ public class MoleculeCategory implements IRecipeCategory<MoleculeCategory.Entry>
     private final IDrawable icon;
 
     public MoleculeCategory(IGuiHelper helper) {
-        this.background = helper.createBlankDrawable(150, 70);
+        this.background = helper.createBlankDrawable(180, 96);
         this.icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(Items.WATER_BUCKET));
     }
 
@@ -57,12 +57,12 @@ public class MoleculeCategory implements IRecipeCategory<MoleculeCategory.Entry>
 
     @Override
     public int getWidth() {
-        return 150;
+        return 180;
     }
 
     @Override
     public int getHeight() {
-        return 70;
+        return 96;
     }
 
     @Override
@@ -87,9 +87,13 @@ public class MoleculeCategory implements IRecipeCategory<MoleculeCategory.Entry>
     @Override
     public void draw(Entry recipe, IRecipeSlotsView view, GuiGraphics gfx, double mouseX, double mouseY) {
         float angle = (float) ((System.currentTimeMillis() % 6000L) / 6000.0 * 360.0);
-        MoleculeRenderer.render(recipe.def().structure(), gfx, 62, 3, 64, angle);
-        gfx.drawString(Minecraft.getInstance().font, recipe.def().formula(), 4, 48, 0xFFCCCCCC, false);
-        gfx.drawString(Minecraft.getInstance().font, recipe.id().toString(), 4, 58, 0xFF888888, false);
+        MoleculeRenderer.render(recipe.def().structure(), gfx, 100, 12, 72, angle);
+        var font = Minecraft.getInstance().font;
+        gfx.drawString(font, recipe.def().formula(), 8, 28, 0xFF202020, false);
+        String id = recipe.id().toString();
+        String shown = font.plainSubstrByWidth(id, 80);
+        if (!shown.equals(id)) shown = shown + "...";
+        gfx.drawString(font, shown, 8, 40, 0xFF404040, false);
     }
 
     public static List<Entry> entries() {
