@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.trifectumsoftware.avogadro.Config;
 import com.trifectumsoftware.avogadro.molecule.MoleculeStructure;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -59,16 +60,26 @@ public final class MoleculeRenderer {
         Matrix4f mat = pose.last().pose();
 
         var elements = new ArrayList<DepthSorted>();
+        boolean cubic = Config.CUBIC_ATOMS.get();
         for (MoleculeStructure.Atom a : atoms) {
             Vector3f p = a.position();
             float vz = viewZ(p, mat);
             int c = a.element().color();
-            elements.add(new DepthSorted(vz, (buf) ->
+            elements.add(new DepthSorted(vz, (buf) -> {
+                if (cubic) {
+                    cube(buf, mat, p.x(), p.y(), p.z(),
+                            a.element().radius() * SPHERE_SCALE,
+                            ((c >> 16) & 0xFF) / 255f,
+                            ((c >> 8) & 0xFF) / 255f,
+                            ((c) & 0xFF) / 255f);
+                } else {
                     sphere(buf, mat, p.x(), p.y(), p.z(),
                             a.element().radius() * SPHERE_SCALE,
                             ((c >> 16) & 0xFF) / 255f,
                             ((c >> 8) & 0xFF) / 255f,
-                            ((c) & 0xFF) / 255f)));
+                            ((c) & 0xFF) / 255f);
+                }
+            }));
         }
         for (MoleculeStructure.Bond b : bonds) {
             Vector3f f = atoms.get(b.from()).position();
@@ -154,6 +165,35 @@ public final class MoleculeRenderer {
                 emit(buf, mat, p4x, p4y, p4z, n4x, n4y, n4z, r, g, b);
             }
         }
+    }
+
+    private static void quad(BufferBuilder buf, Matrix4f mat,
+                             float ax, float ay, float az,
+                             float bx, float by, float bz,
+                             float cx, float cy, float cz,
+                             float dx, float dy, float dz,
+                             float nx, float ny, float nz,
+                             float r, float g, float b) {
+        emit(buf, mat, ax, ay, az, nx, ny, nz, r, g, b);
+        emit(buf, mat, bx, by, bz, nx, ny, nz, r, g, b);
+        emit(buf, mat, cx, cy, cz, nx, ny, nz, r, g, b);
+        emit(buf, mat, ax, ay, az, nx, ny, nz, r, g, b);
+        emit(buf, mat, cx, cy, cz, nx, ny, nz, r, g, b);
+        emit(buf, mat, dx, dy, dz, nx, ny, nz, r, g, b);
+    }
+
+    private static void cube(BufferBuilder buf, Matrix4f mat,
+                             float cx, float cy, float cz,
+                             float radius, float r, float g, float b) {
+        float x0 = cx - radius, x1 = cx + radius;
+        float y0 = cy - radius, y1 = cy + radius;
+        float z0 = cz - radius, z1 = cz + radius;
+        quad(buf, mat, x1, y0, z0, x1, y0, z1, x1, y1, z1, x1, y1, z0, 1f, 0f, 0f, r, g, b);
+        quad(buf, mat, x0, y0, z1, x0, y0, z0, x0, y1, z0, x0, y1, z1, -1f, 0f, 0f, r, g, b);
+        quad(buf, mat, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0f, 1f, 0f, r, g, b);
+        quad(buf, mat, x0, y0, z0, x0, y0, z1, x1, y0, z1, x1, y0, z0, 0f, -1f, 0f, r, g, b);
+        quad(buf, mat, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0f, 0f, 1f, r, g, b);
+        quad(buf, mat, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0f, 0f, -1f, r, g, b);
     }
 
     private static void bond(BufferBuilder buf, Matrix4f mat, Vector3f from, Vector3f to, int order) {

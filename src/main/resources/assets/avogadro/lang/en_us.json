@@ -6,5 +6,6 @@
   "avogadro.configuration.enableTooltips": "Enable Tooltips",
   "avogadro.configuration.tooltipSize": "Tooltip Size",
   "avogadro.configuration.spinSeconds": "Spin Seconds",
-  "avogadro.configuration.jeiCategory": "JEI Category"
+  "avogadro.configuration.jeiCategory": "JEI Category",
+  "avogadro.configuration.cubicAtoms": "Cubic Atoms"
 }
