@@ -40,13 +40,16 @@ One JSON object per file. All fields optional except the geometry source.
 Field reference:
 
 - `smiles`: structure from a SMILES string. Supported: organic subset
-  B C N O P S F Cl Br I, aromatic b c n o p s, bracket atoms such as [Na]
-  [Fe] [Ca] [Ar], bond symbols - = # : / and backslash, branches ( ),
-  ring closures 0-9 and %nn, and . for disconnected fragments. Implicit
-  hydrogens are filled from valence and a force-directed layout is applied.
-  Examples: "O" water, "C" methane, "CC" ethane, "C=C" ethene, "C#C"
-  acetylene, "O=C=O" carbon dioxide, "N" ammonia, "O=S=O" sulfur dioxide,
-  "c1ccccc1" benzene, "CC(=O)C" acetone, "[Na]" sodium, "[C]" carbon.
+  B C N O P S F I, two-letter elements Si Cl Br Na Mg Al K Ca Fe Cu Zn
+  and the rest of the element table, aromatic b c n o p s, bracket atoms
+  for anything else such as [U] or [nH], bond symbols - = # : / and
+  backslash, branches ( ), ring closures 0-9 and %nn, and . for
+  disconnected fragments. Chiral @ markers and reaction > arrows are
+  ignored. Implicit hydrogens are filled from valence and a force-directed
+  layout is applied. Examples: "O" water, "C" methane, "CC" ethane, "C=C"
+  ethene, "C#C" acetylene, "O=C=O" carbon dioxide, "N" ammonia, "O=S=O"
+  sulfur dioxide, "c1ccccc1" benzene, "CC(=O)C" acetone, "CCO" ethanol,
+  "[Na]" sodium, "[C]" carbon, "O[Ca]O" slaked lime.
 - `atoms`: explicit geometry, alternative to `smiles`. If both are present,
   `atoms` wins. Array of `{"e": "O", "x": 0, "y": 0, "z": 0}` where `e` is an
   element symbol and x/y/z are floats in bond-length units.
