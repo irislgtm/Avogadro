@@ -11,6 +11,7 @@ public record AtomElement(String symbol, int color, float radius) {
     public static final AtomElement BROMINE = new AtomElement("Br", 0xFFA62929, 0.40f);
     public static final AtomElement IODINE = new AtomElement("I", 0xFF940094, 0.45f);
     public static final AtomElement SULFUR = new AtomElement("S", 0xFFD9D920, 0.40f);
+    public static final AtomElement SELENIUM = new AtomElement("Se", 0xFFFFA100, 0.40f);
     public static final AtomElement PHOSPHORUS = new AtomElement("P", 0xFFFF8000, 0.40f);
     public static final AtomElement BORON = new AtomElement("B", 0xFFFFB5B5, 0.40f);
     public static final AtomElement SILICON = new AtomElement("Si", 0xFFF0C8A0, 0.42f);
@@ -54,6 +55,7 @@ public record AtomElement(String symbol, int color, float radius) {
             case "Br" -> BROMINE;
             case "I" -> IODINE;
             case "S" -> SULFUR;
+            case "Se" -> SELENIUM;
             case "P" -> PHOSPHORUS;
             case "B" -> BORON;
             case "Si" -> SILICON;
