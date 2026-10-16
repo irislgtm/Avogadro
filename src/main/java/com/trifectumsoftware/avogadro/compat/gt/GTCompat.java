@@ -1,12 +1,12 @@
 package com.trifectumsoftware.avogadro.compat.gt;
 
-import com.gregtechceu.gtceu.api.material.ChemicalHelper;
-import com.gregtechceu.gtceu.api.material.material.Material;
-import com.gregtechceu.gtceu.api.material.material.stack.MaterialStack;
+import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper;
+import com.gregtechceu.gtceu.api.data.chemical.material.Material;
+import com.gregtechceu.gtceu.api.data.chemical.material.stack.MaterialStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 public final class GTCompat {
     public static final String MODID = "gtceu";

@@ -12,9 +12,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,7 +94,7 @@ public final class MoleculeStore {
         for (ItemTagRow row : ITEM_TAGS) {
             if (stack.is(row.tag())) return row.mol();
         }
-        IFluidHandler fluids = Capabilities.FluidHandler.ITEM.getCapability(stack, null);
+        IFluidHandler fluids = stack.getCapability(ForgeCapabilities.FLUID_HANDLER, null).orElse(null);
         if (fluids != null) {
             for (int i = 0; i < fluids.getTanks(); i++) {
                 FluidStack inTank = fluids.getFluidInTank(i);
@@ -123,7 +123,7 @@ public final class MoleculeStore {
         ResourceLocation direct = FLUID.get(key);
         if (direct != null) return direct;
         for (FluidTagRow row : FLUID_TAGS) {
-            if (stack.is(row.tag())) return row.mol();
+            if (fluidHasTag(stack.getFluid(), row.tag())) return row.mol();
         }
         if (GTCompat.isLoaded()) {
             ResourceLocation material = GTCompat.materialId(stack.getFluid());
@@ -135,6 +135,13 @@ public final class MoleculeStore {
             }
         }
         return BY_PATH.get(key.getPath());
+    }
+
+    private static boolean fluidHasTag(Fluid fluid, TagKey<Fluid> tag) {
+        return BuiltInRegistries.FLUID.getResourceKey(fluid)
+                .flatMap(BuiltInRegistries.FLUID::getHolder)
+                .map(h -> h.is(tag))
+                .orElse(false);
     }
 
     public static Map<ResourceLocation, MoleculeDef> parseAll(Map<ResourceLocation, JsonElement> jsons) {

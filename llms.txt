@@ -1,9 +1,10 @@
 # Avogadro — llms.txt
 
-Avogadro is a standalone NeoForge 1.21.1 library mod with no Mekanism dependency.
-It renders spinning 3D ball-and-stick molecules in item tooltips and in a JEI
-"Molecules" recipe category. Any modpack or mod can add molecules for any item,
-fluid, or tag without writing code.
+Avogadro is a standalone Forge 1.20.1 library mod with no Mekanism dependency.
+It shows molecule formulas in item tooltips and renders spinning 3D
+ball-and-stick models in a panel below the tooltip, plus a JEI "Molecules"
+recipe category. Any modpack or mod can add molecules for any item, fluid,
+or tag without writing code.
 
 ## Where molecule files live
 
@@ -27,8 +28,7 @@ One JSON object per file. All fields optional except the geometry source.
 ```json
 {
   "smiles": "CC(=O)C",
-  "formula": "C3H6O",
-  "items": ["mymod:acetone_bucket", "mymod:acetone_bottle"],
+  "formula": "C3H6O",  "items": ["mymod:acetone_bucket", "mymod:acetone_bottle"],
   "item_tags": ["c:ketones"],
   "fluids": ["mymod:acetone", "mymod:flowing_acetone"],
   "fluid_tags": ["c:acetone"],
@@ -40,13 +40,16 @@ One JSON object per file. All fields optional except the geometry source.
 Field reference:
 
 - `smiles`: structure from a SMILES string. Supported: organic subset
-  B C N O P S F Cl Br I, aromatic b c n o p s, bracket atoms such as [Na]
-  [Fe] [Ca] [Ar], bond symbols - = # : / and backslash, branches ( ),
-  ring closures 0-9 and %nn, and . for disconnected fragments. Implicit
-  hydrogens are filled from valence and a force-directed layout is applied.
-  Examples: "O" water, "C" methane, "CC" ethane, "C=C" ethene, "C#C"
-  acetylene, "O=C=O" carbon dioxide, "N" ammonia, "O=S=O" sulfur dioxide,
-  "c1ccccc1" benzene, "CC(=O)C" acetone, "[Na]" sodium, "[C]" carbon.
+  B C N O P S F I, two-letter elements Si Cl Br Na Mg Al K Ca Fe Cu Zn
+  and the rest of the element table, aromatic b c n o p s, bracket atoms
+  for anything else such as [U] or [nH], bond symbols - = # : / and
+  backslash, branches ( ), ring closures 0-9 and %nn, and . for
+  disconnected fragments. Chiral @ markers and reaction > arrows are
+  ignored. Implicit hydrogens are filled from valence and a force-directed
+  layout is applied. Examples: "O" water, "C" methane, "CC" ethane, "C=C"
+  ethene, "C#C" acetylene, "O=C=O" carbon dioxide, "N" ammonia, "O=S=O"
+  sulfur dioxide, "c1ccccc1" benzene, "CC(=O)C" acetone, "CCO" ethanol,
+  "[Na]" sodium, "[C]" carbon, "O[Ca]O" slaked lime.
 - `atoms`: explicit geometry, alternative to `smiles`. If both are present,
   `atoms` wins. Array of `{"e": "O", "x": 0, "y": 0, "z": 0}` where `e` is an
   element symbol and x/y/z are floats in bond-length units.
@@ -109,15 +112,15 @@ the `materials` lists are inert and nothing else changes.
 
 ## JEI notes
 
-- Item tooltips in JEI render the same molecule component as inventories.
-- Fluid hovers render the molecule through an optional client mixin into
-  JEI's ingredient renderer. The mixin disables itself if JEI is absent or
-  changes internals; buckets, tanks, and the category below still work.
+- Item tooltips in JEI gain the formula line, and the 3D panel draws below
+  the tooltip wherever Forge fires the tooltip render event.
 - The Molecules category lists every loaded molecule with its formula and
   up to 4 representative bound items. Press U on a bound item to find it.
 - Category contents are fixed at JEI startup: built-in, asset, and config
   molecules always appear. Server datapack molecules appear in tooltips after
   sync; they join the category after a client restart.
+- 1.20.1 has no tooltip-component system, so fluid ingredient hovers cannot
+  embed the 3D view: use buckets, tanks, and cells to see the full panel.
 
 ## Minimal examples
 

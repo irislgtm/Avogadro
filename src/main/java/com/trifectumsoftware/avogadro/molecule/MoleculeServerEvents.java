@@ -2,12 +2,13 @@ package com.trifectumsoftware.avogadro.molecule;
 
 import com.trifectumsoftware.avogadro.Avogadro;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
-@EventBusSubscriber(modid = Avogadro.MODID)
+@Mod.EventBusSubscriber(modid = Avogadro.MODID)
 public final class MoleculeServerEvents {
     private MoleculeServerEvents() {
     }
@@ -21,9 +22,9 @@ public final class MoleculeServerEvents {
     public static void sync(OnDatapackSyncEvent event) {
         ServerPlayer player = event.getPlayer();
         if (player == null) {
-            MoleculeSync.sendAll();
+            MoleculeNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), MoleculeSync.snapshot());
         } else {
-            MoleculeSync.sendTo(player);
+            MoleculeNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), MoleculeSync.snapshot());
         }
     }
 }
