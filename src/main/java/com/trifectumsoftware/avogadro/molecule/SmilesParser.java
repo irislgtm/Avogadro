@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class SmilesParser {
 
@@ -12,6 +13,10 @@ public final class SmilesParser {
     }
 
     private static final int ITERATIONS = 500;
+    private static final Set<String> TWO_LETTER = Set.of(
+            "He", "Li", "Na", "Mg", "Al", "Si", "Cl", "Ar", "Ca", "Ti",
+            "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Br", "Kr", "Ag",
+            "Sn", "Xe", "Au", "Pb", "Se", "Ne", "Os", "Pu", "Po");
     private static final float BOND = 1.0f;
     private static final float SPRING = 0.12f;
     private static final float REPULSION = 0.10f;
@@ -81,6 +86,10 @@ public final class SmilesParser {
                 i++;
                 continue;
             }
+            if (c == '@' || c == '>') {
+                i++;
+                continue;
+            }
             if (c == '-' || c == '=' || c == '#' || c == ':' || c == '/' || c == '\\') {
                 pending = switch (c) {
                     case '=' -> 2;
@@ -112,7 +121,8 @@ public final class SmilesParser {
                 parseBracket(s.substring(i + 1, end), atom);
                 i = end + 1;
             } else {
-                if (i + 1 < n && ((c == 'C' && s.charAt(i + 1) == 'l') || (c == 'B' && s.charAt(i + 1) == 'r'))) {
+                if (i + 1 < n && Character.isUpperCase(c) && Character.isLowerCase(s.charAt(i + 1))
+                        && TWO_LETTER.contains(s.substring(i, i + 2))) {
                     atom.element = s.substring(i, i + 2);
                     i += 2;
                 } else {
