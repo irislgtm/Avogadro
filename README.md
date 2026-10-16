@@ -8,3 +8,18 @@
 Standalone molecule tooltip library for NeoForge 1.21.1 and Forge 1.20.1
 
 Note: I suspect most users will be using LLMs to write datapacks, so the standard format is visible in `llms.txt`. 
+
+However a simple example is visible here:
+
+```json
+{
+  "smiles": "CC(=O)C",
+  "formula": "C3H6O",
+  "items": ["mymod:acetone_bucket", "mymod:acetone_bottle"],
+  "item_tags": ["c:ketones"],
+  "fluids": ["mymod:acetone", "mymod:flowing_acetone"],
+  "fluid_tags": ["c:acetone"],
+  "match_containers": true,
+  "copy": "avogadro:acetone"
+}
+```
