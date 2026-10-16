@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "package": "com.trifectumsoftware.avogadro.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": ["jei.IngredientRendererMixin"],
+  "injectors": {"defaultRequire": 1}
+}

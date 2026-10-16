@@ -1,0 +1,91 @@
+package com.trifectumsoftware.avogadro.molecule;
+
+public record AtomElement(String symbol, int color, float radius) {
+
+    public static final AtomElement HYDROGEN = new AtomElement("H", 0xFFFFFFFF, 0.25f);
+    public static final AtomElement CARBON = new AtomElement("C", 0xFF3A3A3A, 0.40f);
+    public static final AtomElement NITROGEN = new AtomElement("N", 0xFF3050F8, 0.35f);
+    public static final AtomElement OXYGEN = new AtomElement("O", 0xFFE63333, 0.35f);
+    public static final AtomElement FLUORINE = new AtomElement("F", 0xFF90E050, 0.30f);
+    public static final AtomElement CHLORINE = new AtomElement("Cl", 0xFF1FF01F, 0.35f);
+    public static final AtomElement BROMINE = new AtomElement("Br", 0xFFA62929, 0.40f);
+    public static final AtomElement IODINE = new AtomElement("I", 0xFF940094, 0.45f);
+    public static final AtomElement SULFUR = new AtomElement("S", 0xFFD9D920, 0.40f);
+    public static final AtomElement PHOSPHORUS = new AtomElement("P", 0xFFFF8000, 0.40f);
+    public static final AtomElement BORON = new AtomElement("B", 0xFFFFB5B5, 0.40f);
+    public static final AtomElement SILICON = new AtomElement("Si", 0xFFF0C8A0, 0.42f);
+    public static final AtomElement SODIUM = new AtomElement("Na", 0xFFAB5CF2, 0.45f);
+    public static final AtomElement POTASSIUM = new AtomElement("K", 0xFF8F40D4, 0.48f);
+    public static final AtomElement LITHIUM = new AtomElement("Li", 0xFFCC80FF, 0.42f);
+    public static final AtomElement CALCIUM = new AtomElement("Ca", 0xFF3DFF00, 0.46f);
+    public static final AtomElement MAGNESIUM = new AtomElement("Mg", 0xFF8AFF00, 0.44f);
+    public static final AtomElement ALUMINIUM = new AtomElement("Al", 0xFFBFA6A6, 0.44f);
+    public static final AtomElement IRON = new AtomElement("Fe", 0xFFE06633, 0.42f);
+    public static final AtomElement COPPER = new AtomElement("Cu", 0xFFC88033, 0.42f);
+    public static final AtomElement ZINC = new AtomElement("Zn", 0xFF7D80B0, 0.42f);
+    public static final AtomElement TIN = new AtomElement("Sn", 0xFF668080, 0.44f);
+    public static final AtomElement LEAD = new AtomElement("Pb", 0xFF575961, 0.46f);
+    public static final AtomElement SILVER = new AtomElement("Ag", 0xFFC0C0C0, 0.44f);
+    public static final AtomElement GOLD = new AtomElement("Au", 0xFFFFD123, 0.44f);
+    public static final AtomElement MANGANESE = new AtomElement("Mn", 0xFF9C7AC7, 0.42f);
+    public static final AtomElement CHROMIUM = new AtomElement("Cr", 0xFF8A99C7, 0.42f);
+    public static final AtomElement NICKEL = new AtomElement("Ni", 0xFF50D050, 0.42f);
+    public static final AtomElement COBALT = new AtomElement("Co", 0xFFF090A0, 0.42f);
+    public static final AtomElement TITANIUM = new AtomElement("Ti", 0xFFBFC2C7, 0.43f);
+    public static final AtomElement TUNGSTEN = new AtomElement("W", 0xFF2194D6, 0.44f);
+    public static final AtomElement OSMIUM = new AtomElement("Os", 0xFF26558F, 0.43f);
+    public static final AtomElement URANIUM = new AtomElement("U", 0xFF008FFF, 0.46f);
+    public static final AtomElement PLUTONIUM = new AtomElement("Pu", 0xFF006B6B, 0.46f);
+    public static final AtomElement POLONIUM = new AtomElement("Po", 0xFFAB5C00, 0.45f);
+    public static final AtomElement ARGON = new AtomElement("Ar", 0xFF80D1E3, 0.40f);
+    public static final AtomElement KRYPTON = new AtomElement("Kr", 0xFF5CB8D1, 0.42f);
+    public static final AtomElement HELIUM = new AtomElement("He", 0xFFD9FFFF, 0.28f);
+    public static final AtomElement NEON = new AtomElement("Ne", 0xFFB3E3F5, 0.34f);
+    public static final AtomElement XENON = new AtomElement("Xe", 0xFF429EB0, 0.44f);
+
+    public static AtomElement bySymbol(String s) {
+        return switch (s) {
+            case "H" -> HYDROGEN;
+            case "C" -> CARBON;
+            case "N" -> NITROGEN;
+            case "O" -> OXYGEN;
+            case "F" -> FLUORINE;
+            case "Cl" -> CHLORINE;
+            case "Br" -> BROMINE;
+            case "I" -> IODINE;
+            case "S" -> SULFUR;
+            case "P" -> PHOSPHORUS;
+            case "B" -> BORON;
+            case "Si" -> SILICON;
+            case "Na" -> SODIUM;
+            case "K" -> POTASSIUM;
+            case "Li" -> LITHIUM;
+            case "Ca" -> CALCIUM;
+            case "Mg" -> MAGNESIUM;
+            case "Al" -> ALUMINIUM;
+            case "Fe" -> IRON;
+            case "Cu" -> COPPER;
+            case "Zn" -> ZINC;
+            case "Sn" -> TIN;
+            case "Pb" -> LEAD;
+            case "Ag" -> SILVER;
+            case "Au" -> GOLD;
+            case "Mn" -> MANGANESE;
+            case "Cr" -> CHROMIUM;
+            case "Ni" -> NICKEL;
+            case "Co" -> COBALT;
+            case "Ti" -> TITANIUM;
+            case "W" -> TUNGSTEN;
+            case "Os" -> OSMIUM;
+            case "U" -> URANIUM;
+            case "Pu" -> PLUTONIUM;
+            case "Po" -> POLONIUM;
+            case "Ar" -> ARGON;
+            case "Kr" -> KRYPTON;
+            case "He" -> HELIUM;
+            case "Ne" -> NEON;
+            case "Xe" -> XENON;
+            default -> new AtomElement(s, 0xFFFF88FF, 0.35f);
+        };
+    }
+}
