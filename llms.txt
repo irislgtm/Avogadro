@@ -1,0 +1,158 @@
+# Avogadro — llms.txt
+
+Avogadro is a standalone NeoForge 1.21.1 library mod with no Mekanism dependency.
+It renders spinning 3D ball-and-stick molecules in item tooltips and in a JEI
+"Molecules" recipe category. Any modpack or mod can add molecules for any item,
+fluid, or tag without writing code.
+
+## Where molecule files live
+
+Three sources, merged on the client. Later sources win when ids collide:
+
+1. Datapacks (shared, synced to clients on login and /reload):
+   `data/<namespace>/molecules/<path>.json` -> molecule id `<namespace>:<path>`
+2. Resource packs and mod jars (client art overrides):
+   `assets/<namespace>/molecules/<path>.json` -> same id scheme
+3. Local config (per-user overrides, client only):
+   `config/avogadro/molecules/<name>.json` -> molecule id `avogadro:<name>`
+
+Invalid files are skipped silently. `/reload` reloads datapack files on the
+server and re-syncs them; resource-pack reload (F3+T) reloads asset and config
+files on the client.
+
+## File format
+
+One JSON object per file. All fields optional except the geometry source.
+
+```json
+{
+  "smiles": "CC(=O)C",
+  "formula": "C3H6O",
+  "items": ["mymod:acetone_bucket", "mymod:acetone_bottle"],
+  "item_tags": ["c:ketones"],
+  "fluids": ["mymod:acetone", "mymod:flowing_acetone"],
+  "fluid_tags": ["c:acetone"],
+  "match_containers": true,
+  "copy": "avogadro:acetone"
+}
+```
+
+Field reference:
+
+- `smiles`: structure from a SMILES string. Supported: organic subset
+  B C N O P S F Cl Br I, aromatic b c n o p s, bracket atoms such as [Na]
+  [Fe] [Ca] [Ar], bond symbols - = # : / and backslash, branches ( ),
+  ring closures 0-9 and %nn, and . for disconnected fragments. Implicit
+  hydrogens are filled from valence and a force-directed layout is applied.
+  Examples: "O" water, "C" methane, "CC" ethane, "C=C" ethene, "C#C"
+  acetylene, "O=C=O" carbon dioxide, "N" ammonia, "O=S=O" sulfur dioxide,
+  "c1ccccc1" benzene, "CC(=O)C" acetone, "[Na]" sodium, "[C]" carbon.
+- `atoms`: explicit geometry, alternative to `smiles`. If both are present,
+  `atoms` wins. Array of `{"e": "O", "x": 0, "y": 0, "z": 0}` where `e` is an
+  element symbol and x/y/z are floats in bond-length units.
+- `bonds`: explicit bonds for `atoms` geometry. Each entry is
+  `[from, to]` or `[from, to, type]` with 0-based atom indices. Type is
+  "SINGLE" (default), "DOUBLE", "TRIPLE", "QUADRUPLE", or 1/2/3/4, or one of
+  -=#. Omit `bonds` to auto-bond atoms closer than 1.3x their summed radii.
+- `formula`: display string shown under the molecule in JEI. Omit to
+  auto-compute Hill order (C, then H, then alphabetical) with Unicode
+  subscripts, e.g. H2O renders as H + subscript 2 + O.
+- `items`: item ids that show this molecule, e.g. "minecraft:water_bucket".
+- `item_tags`: item tag ids, with or without leading #, e.g. "minecraft:coals".
+- `fluids`: fluid ids, e.g. "minecraft:water" plus "minecraft:flowing_water".
+- `fluid_tags`: fluid tag ids, e.g. "minecraft:water".
+- `materials`: GregTech Modern material ids, e.g. "gtceu:water". Matches any
+  item or fluid whose GTM material is listed. Ignored without GT installed.
+- `match_containers`: default true. When true, any item holding a bound fluid
+  (buckets, tanks, bottles with a fluid capability) also shows the molecule.
+  Set false so the molecule only matches the fluid itself in JEI.
+- `copy`: reuse another molecule's geometry, e.g. `"copy": "avogadro:water"`.
+  Own `formula` overrides the copied one; own target lists are unioned with
+  the copied ones. Useful in config to bind new items to an existing shape
+  without copying coordinates.
+
+## Resolution order for a hovered item
+
+1. Direct item id match in `items`.
+2. Item tag match in `item_tags`, in load order.
+3. Fluid inside the item (bucket/tank contents) matched against `fluids`,
+   then `fluid_tags`, when that molecule has `match_containers: true`.
+4. GregTech Modern material of the item or fluid matched against
+   `materials`, then material path against molecule path. Skipped without GT.
+5. Fallback: a molecule whose path equals the item path
+   (item `mymod:acetone` matches molecule `anything:acetone`).
+   Explicit bindings always beat the fallback.
+
+For JEI fluid ingredients the same order applies starting at the fluid step.
+
+## GregTech Modern (soft optional compat)
+
+With GTCEu Modern installed, any item or fluid carrying a GTM material also
+matches `materials` entries plus a path fallback on the material name, so
+`gtceu:toluene` finds `anything:toluene` with no per-item bindings. Works in
+inventories, JEI lists, recipe views, tanks, and cells. Without GT installed
+the `materials` lists are inert and nothing else changes.
+
+```json
+{
+  "smiles": "Cc1ccccc1",
+  "materials": ["gtceu:toluene"]
+}
+```
+
+## Config (avogadro-common.toml)
+
+- `enableTooltips`: show molecules in tooltips. Default true.
+- `tooltipSize`: molecule box in pixels, 16-128. Default 64.
+- `spinSeconds`: seconds per full rotation, 0.5-60. Default 6.0.
+- `jeiCategory`: register the JEI Molecules category. Default true.
+
+## JEI notes
+
+- Item tooltips in JEI render the same molecule component as inventories.
+- Fluid hovers render the molecule through an optional client mixin into
+  JEI's ingredient renderer. The mixin disables itself if JEI is absent or
+  changes internals; buckets, tanks, and the category below still work.
+- The Molecules category lists every loaded molecule with its formula and
+  up to 4 representative bound items. Press U on a bound item to find it.
+- Category contents are fixed at JEI startup: built-in, asset, and config
+  molecules always appear. Server datapack molecules appear in tooltips after
+  sync; they join the category after a client restart.
+
+## Minimal examples
+
+Bind an existing shape to your items (config/avogadro/molecules/acetone.json):
+
+```json
+{
+  "copy": "avogadro:benzene",
+  "formula": "C3H6O",
+  "items": ["mymod:acetone_bucket"],
+  "fluids": ["mymod:acetone", "mymod:flowing_acetone"]
+}
+```
+
+Hand-placed water molecule (equivalent to `"smiles": "O"`):
+
+```json
+{
+  "formula": "H2O",
+  "atoms": [
+    {"e": "O", "x": 0, "y": 0, "z": 0},
+    {"e": "H", "x": -0.593, "y": 0.459, "z": 0},
+    {"e": "H", "x": 0.593, "y": 0.459, "z": 0}
+  ],
+  "items": ["mymod:water_bottle"],
+  "fluids": ["mymod:water"]
+}
+```
+
+Sulfuric acid with explicit double bonds:
+
+```json
+{
+  "smiles": "OS(=O)(=O)O",
+  "items": ["mymod:acid_bucket"],
+  "fluid_tags": ["c:sulfuric_acid"]
+}
+```

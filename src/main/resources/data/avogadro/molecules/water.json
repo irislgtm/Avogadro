@@ -1,0 +1,7 @@
+{
+  "smiles": "O",
+  "items": ["minecraft:water_bucket", "minecraft:ice", "minecraft:packed_ice", "minecraft:blue_ice", "minecraft:snowball", "minecraft:snow_block", "minecraft:powder_snow_bucket"],
+  "fluids": ["minecraft:water", "minecraft:flowing_water"],
+  "fluid_tags": ["minecraft:water"],
+  "materials": ["gtceu:water", "gtceu:distilled_water"]
+}
