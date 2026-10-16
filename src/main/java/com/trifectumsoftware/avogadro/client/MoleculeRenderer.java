@@ -86,7 +86,7 @@ public final class MoleculeRenderer {
             Vector3f t = atoms.get(b.to()).position();
             float vz = viewZMid(f, t, mat);
             int ord = b.type().order();
-            elements.add(new DepthSorted(vz, (buf -> bond(buf, mat, f, t, ord))));
+            elements.add(new DepthSorted(vz, (buf -> bond(buf, mat, f, t, ord, cubic))));
         }
         elements.sort(Comparator.comparingDouble(e -> e.viewZ));
 
@@ -197,9 +197,9 @@ public final class MoleculeRenderer {
         emit(buf, mat, dx, dy, dz, nx, ny, nz, r, g, b);
     }
 
-    private static void bond(BufferBuilder buf, Matrix4f mat, Vector3f from, Vector3f to, int order) {
+    private static void bond(BufferBuilder buf, Matrix4f mat, Vector3f from, Vector3f to, int order, boolean cubic) {
         if (order <= 1) {
-            cylinder(buf, mat, from, to, SINGLE_BOND_RADIUS);
+            cylinder(buf, mat, from, to, SINGLE_BOND_RADIUS, cubic);
             return;
         }
         float dx = to.x() - from.x();
@@ -210,30 +210,30 @@ public final class MoleculeRenderer {
         float py = perp[1];
         float pz = perp[2];
         if (order == 2) {
-            cylinderOffset(buf, mat, from, to, px * MULTI_BOND_GAP, py * MULTI_BOND_GAP, pz * MULTI_BOND_GAP, MULTI_BOND_RADIUS);
-            cylinderOffset(buf, mat, from, to, -px * MULTI_BOND_GAP, -py * MULTI_BOND_GAP, -pz * MULTI_BOND_GAP, MULTI_BOND_RADIUS);
+            cylinderOffset(buf, mat, from, to, px * MULTI_BOND_GAP, py * MULTI_BOND_GAP, pz * MULTI_BOND_GAP, MULTI_BOND_RADIUS, cubic);
+            cylinderOffset(buf, mat, from, to, -px * MULTI_BOND_GAP, -py * MULTI_BOND_GAP, -pz * MULTI_BOND_GAP, MULTI_BOND_RADIUS, cubic);
         } else {
-            cylinder(buf, mat, from, to, MULTI_BOND_RADIUS);
-            cylinderOffset(buf, mat, from, to, px * MULTI_BOND_GAP * 2f, py * MULTI_BOND_GAP * 2f, pz * MULTI_BOND_GAP * 2f, MULTI_BOND_RADIUS);
-            cylinderOffset(buf, mat, from, to, -px * MULTI_BOND_GAP * 2f, -py * MULTI_BOND_GAP * 2f, -pz * MULTI_BOND_GAP * 2f, MULTI_BOND_RADIUS);
+            cylinder(buf, mat, from, to, MULTI_BOND_RADIUS, cubic);
+            cylinderOffset(buf, mat, from, to, px * MULTI_BOND_GAP * 2f, py * MULTI_BOND_GAP * 2f, pz * MULTI_BOND_GAP * 2f, MULTI_BOND_RADIUS, cubic);
+            cylinderOffset(buf, mat, from, to, -px * MULTI_BOND_GAP * 2f, -py * MULTI_BOND_GAP * 2f, -pz * MULTI_BOND_GAP * 2f, MULTI_BOND_RADIUS, cubic);
         }
     }
 
     private static void cylinderOffset(BufferBuilder buf, Matrix4f mat, Vector3f from, Vector3f to,
-                                       float ox, float oy, float oz, float radius) {
+                                       float ox, float oy, float oz, float radius, boolean cubic) {
         cylinderLine(buf, mat,
                 from.x() + ox, from.y() + oy, from.z() + oz,
                 to.x() + ox, to.y() + oy, to.z() + oz,
-                radius);
+                radius, cubic);
     }
 
-    private static void cylinder(BufferBuilder buf, Matrix4f mat, Vector3f from, Vector3f to, float radius) {
-        cylinderLine(buf, mat, from.x(), from.y(), from.z(), to.x(), to.y(), to.z(), radius);
+    private static void cylinder(BufferBuilder buf, Matrix4f mat, Vector3f from, Vector3f to, float radius, boolean cubic) {
+        cylinderLine(buf, mat, from.x(), from.y(), from.z(), to.x(), to.y(), to.z(), radius, cubic);
     }
 
     private static void cylinderLine(BufferBuilder buf, Matrix4f mat,
                                      float fx, float fy, float fz,
-                                     float tx, float ty, float tz, float radius) {
+                                     float tx, float ty, float tz, float radius, boolean square) {
         float dx = tx - fx, dy = ty - fy, dz = tz - fz;
         float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (len < 0.0001f) return;
@@ -268,9 +268,9 @@ public final class MoleculeRenderer {
         float ry = nz * ux - nx * uz;
         float rz = nx * uy - ny * ux;
 
-        for (int i = 0; i < CYL_SEGMENTS; i++) {
-            float a1 = (float) (2.0 * Math.PI * i / CYL_SEGMENTS);
-            float a2 = (float) (2.0 * Math.PI * (i + 1) / CYL_SEGMENTS);
+        for (int i = 0; i < (square ? 4 : CYL_SEGMENTS); i++) {
+            float a1 = (float) (2.0 * Math.PI * i / (square ? 4 : CYL_SEGMENTS));
+            float a2 = (float) (2.0 * Math.PI * (i + 1) / (square ? 4 : CYL_SEGMENTS));
             float c1 = (float) Math.cos(a1), s1 = (float) Math.sin(a1);
             float c2 = (float) Math.cos(a2), s2 = (float) Math.sin(a2);
 
@@ -286,6 +286,18 @@ public final class MoleculeRenderer {
             nn2y /= nn2l;
             nn2z /= nn2l;
 
+            float f1x = nn1x, f1y = nn1y, f1z = nn1z;
+            float f2x = nn2x, f2y = nn2y, f2z = nn2z;
+            if (square) {
+                float am = (a1 + a2) * 0.5f;
+                float cm = (float) Math.cos(am), sm = (float) Math.sin(am);
+                float qx = rx * cm + ux * sm, qy = ry * cm + uy * sm, qz = rz * cm + uz * sm;
+                float ql = (float) Math.sqrt(qx * qx + qy * qy + qz * qz);
+                f1x = f2x = qx / ql;
+                f1y = f2y = qy / ql;
+                f1z = f2z = qz / ql;
+            }
+
             float p1ax = fx + (rx * c1 + ux * s1) * radius;
             float p1ay = fy + (ry * c1 + uy * s1) * radius;
             float p1az = fz + (rz * c1 + uz * s1) * radius;
@@ -299,13 +311,13 @@ public final class MoleculeRenderer {
             float p2by = ty + (ry * c2 + uy * s2) * radius;
             float p2bz = tz + (rz * c2 + uz * s2) * radius;
 
-            emit(buf, mat, p1ax, p1ay, p1az, nn1x, nn1y, nn1z, BOND_R, BOND_G, BOND_B);
-            emit(buf, mat, p2ax, p2ay, p2az, nn1x, nn1y, nn1z, BOND_R, BOND_G, BOND_B);
-            emit(buf, mat, p2bx, p2by, p2bz, nn2x, nn2y, nn2z, BOND_R, BOND_G, BOND_B);
+            emit(buf, mat, p1ax, p1ay, p1az, f1x, f1y, f1z, BOND_R, BOND_G, BOND_B);
+            emit(buf, mat, p2ax, p2ay, p2az, f1x, f1y, f1z, BOND_R, BOND_G, BOND_B);
+            emit(buf, mat, p2bx, p2by, p2bz, f2x, f2y, f2z, BOND_R, BOND_G, BOND_B);
 
-            emit(buf, mat, p1ax, p1ay, p1az, nn1x, nn1y, nn1z, BOND_R, BOND_G, BOND_B);
-            emit(buf, mat, p2bx, p2by, p2bz, nn2x, nn2y, nn2z, BOND_R, BOND_G, BOND_B);
-            emit(buf, mat, p1bx, p1by, p1bz, nn2x, nn2y, nn2z, BOND_R, BOND_G, BOND_B);
+            emit(buf, mat, p1ax, p1ay, p1az, f1x, f1y, f1z, BOND_R, BOND_G, BOND_B);
+            emit(buf, mat, p2bx, p2by, p2bz, f2x, f2y, f2z, BOND_R, BOND_G, BOND_B);
+            emit(buf, mat, p1bx, p1by, p1bz, f2x, f2y, f2z, BOND_R, BOND_G, BOND_B);
         }
     }
 
