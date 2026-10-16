@@ -85,9 +85,10 @@ public final class MoleculeRenderer {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        var buf = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+        var buf = Tesselator.getInstance().getBuilder();
+        buf.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
         for (DepthSorted e : elements) e.emit().run(buf);
-        BufferUploader.drawWithShader(buf.buildOrThrow());
+        BufferUploader.drawWithShader(buf.end());
 
         RenderSystem.disableBlend();
         RenderSystem.disableDepthTest();
@@ -279,7 +280,7 @@ public final class MoleculeRenderer {
         float y = mat.m01() * px + mat.m11() * py + mat.m21() * pz + mat.m31();
         float z = mat.m02() * px + mat.m12() * py + mat.m22() * pz + mat.m32();
 
-        buf.addVertex(x, y, z).setColor(r * br, g * br, b * br, 1f);
+        buf.vertex(x, y, z).color(r * br, g * br, b * br, 1f).endVertex();
     }
 
     @FunctionalInterface

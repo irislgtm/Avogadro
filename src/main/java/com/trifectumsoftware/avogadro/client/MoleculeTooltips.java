@@ -5,12 +5,13 @@ import com.trifectumsoftware.avogadro.Avogadro;
 import com.trifectumsoftware.avogadro.Config;
 import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-@EventBusSubscriber(modid = Avogadro.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = Avogadro.MODID, value = Dist.CLIENT)
 public final class MoleculeTooltips {
     private MoleculeTooltips() {
     }
