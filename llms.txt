@@ -109,6 +109,7 @@ the `materials` lists are inert and nothing else changes.
 - `tooltipSize`: molecule box in pixels, 16-128. Default 64.
 - `spinSeconds`: seconds per full rotation, 0.5-60. Default 6.0.
 - `jeiCategory`: register the JEI Molecules category. Default true.
+- `cubicAtoms`: render atoms as cubes instead of spheres. Default false.
 
 ## JEI notes
 

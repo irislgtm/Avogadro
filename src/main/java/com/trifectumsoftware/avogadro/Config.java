@@ -13,5 +13,7 @@ public class Config {
 
     public static final ModConfigSpec.BooleanValue JEI_CATEGORY = BUILDER.define("jeiCategory", true);
 
+    public static final ModConfigSpec.BooleanValue CUBIC_ATOMS = BUILDER.define("cubicAtoms", false);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 }
