@@ -5,7 +5,7 @@
 
 
 
-Standalone molecule tooltip library for NeoForge 1.21.1 and Forge 1.20.1
+Standalone molecule tooltip library for NeoForge 1.21.1, Forge 1.20.1 and Forge 1.7.10
 
 Note: I suspect most users will be using LLMs to write datapacks, so the standard format is visible in `llms.txt`. 
 
