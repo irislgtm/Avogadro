@@ -1,4 +1,4 @@
-package com.trifectumsoftware.avogadro.client;
+package com.trifectumsoftware.avogadro.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;

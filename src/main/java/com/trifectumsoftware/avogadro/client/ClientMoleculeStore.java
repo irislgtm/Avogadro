@@ -9,12 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class MoleculeClientStore {
+public final class ClientMoleculeStore {
     private static Map<ResourceLocation, MoleculeDef> server = new LinkedHashMap<>();
     private static Map<ResourceLocation, MoleculeDef> assets = new LinkedHashMap<>();
     private static Map<ResourceLocation, MoleculeDef> overrides = new LinkedHashMap<>();
 
-    private MoleculeClientStore() {
+    private ClientMoleculeStore() {
     }
 
     public static void applyServerJson(Map<ResourceLocation, String> raw) {

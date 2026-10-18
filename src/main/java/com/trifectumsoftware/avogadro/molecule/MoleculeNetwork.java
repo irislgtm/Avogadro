@@ -1,7 +1,7 @@
 package com.trifectumsoftware.avogadro.molecule;
 
 import com.trifectumsoftware.avogadro.Avogadro;
-import com.trifectumsoftware.avogadro.client.MoleculeClientStore;
+import com.trifectumsoftware.avogadro.client.ClientMoleculeStore;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -30,7 +30,7 @@ public final class MoleculeNetwork {
     }
 
     private static void handle(MoleculeSync message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> MoleculeClientStore.applyServerJson(message.entries()));
+        ctx.get().enqueueWork(() -> ClientMoleculeStore.applyServerJson(message.entries()));
         ctx.get().setPacketHandled(true);
     }
 }

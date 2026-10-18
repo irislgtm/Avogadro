@@ -2,7 +2,7 @@ package com.trifectumsoftware.avogadro.compat.jei;
 
 import com.trifectumsoftware.avogadro.Avogadro;
 import com.trifectumsoftware.avogadro.Config;
-import com.trifectumsoftware.avogadro.client.MoleculeRenderer;
+import com.trifectumsoftware.avogadro.client.render.MoleculeRenderer;
 import com.trifectumsoftware.avogadro.molecule.MoleculeDef;
 import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 import mezz.jei.api.constants.VanillaTypes;

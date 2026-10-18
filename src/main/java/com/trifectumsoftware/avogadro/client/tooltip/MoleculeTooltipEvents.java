@@ -1,4 +1,4 @@
-package com.trifectumsoftware.avogadro.client;
+package com.trifectumsoftware.avogadro.client.tooltip;
 
 import com.mojang.datafixers.util.Either;
 import com.trifectumsoftware.avogadro.Avogadro;
@@ -12,8 +12,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = Avogadro.MODID, value = Dist.CLIENT)
-public final class MoleculeTooltips {
-    private MoleculeTooltips() {
+public final class MoleculeTooltipEvents {
+    private MoleculeTooltipEvents() {
     }
 
     @SubscribeEvent

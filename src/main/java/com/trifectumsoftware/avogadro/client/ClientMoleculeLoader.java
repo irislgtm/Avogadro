@@ -21,14 +21,14 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class MoleculeAssets implements PreparableReloadListener {
+public class ClientMoleculeLoader implements PreparableReloadListener {
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager,
                                           ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler,
                                           Executor backgroundExecutor, Executor gameExecutor) {
         return CompletableFuture.supplyAsync(() -> scan(manager), backgroundExecutor)
                 .thenCompose(barrier::wait)
-                .thenAcceptAsync(found -> MoleculeClientStore.applyLocal(found.assets(), found.configs()), gameExecutor);
+                .thenAcceptAsync(found -> ClientMoleculeStore.applyLocal(found.assets(), found.configs()), gameExecutor);
     }
 
     private record Found(Map<ResourceLocation, MoleculeDef> assets, Map<ResourceLocation, MoleculeDef> configs) {
