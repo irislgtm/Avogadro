@@ -1,6 +1,0 @@
-{
-  "smiles": "[C]",
-  "formula": "C",
-  "items": ["minecraft:coal", "minecraft:charcoal", "minecraft:diamond", "minecraft:coal_block", "minecraft:diamond_block"],
-  "item_tags": ["minecraft:coals"]
-}

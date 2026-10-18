@@ -1,7 +1,5 @@
 package com.trifectumsoftware.avogadro.molecule;
 
-import org.joml.Vector3f;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,14 +11,14 @@ public final class MoleculeStructure {
     private final List<Atom> atoms;
     private final List<Bond> bonds;
 
-    private volatile Vector3f centerCache;
+    private volatile Vec3 centerCache;
     private volatile Float radiusCache;
 
     private MoleculeStructure(String id, String formula, List<Atom> atoms, List<Bond> bonds) {
         this.id = id;
         this.formula = formula;
-        this.atoms = Collections.unmodifiableList(atoms);
-        this.bonds = Collections.unmodifiableList(bonds);
+        this.atoms = Collections.unmodifiableList(new ArrayList<Atom>(atoms));
+        this.bonds = Collections.unmodifiableList(new ArrayList<Bond>(bonds));
     }
 
     public String id() {
@@ -39,17 +37,20 @@ public final class MoleculeStructure {
         return bonds;
     }
 
-    public Vector3f center() {
-        Vector3f c = centerCache;
+    public Vec3 center() {
+        Vec3 c = centerCache;
         if (c == null) {
             float cx = 0f, cy = 0f, cz = 0f;
             for (Atom a : atoms) {
-                cx += a.position().x();
-                cy += a.position().y();
-                cz += a.position().z();
+                cx += a.position()
+                    .x();
+                cy += a.position()
+                    .y();
+                cz += a.position()
+                    .z();
             }
             int n = atoms.size();
-            centerCache = c = new Vector3f(cx / n, cy / n, cz / n);
+            centerCache = c = new Vec3(cx / n, cy / n, cz / n);
         }
         return c;
     }
@@ -57,14 +58,15 @@ public final class MoleculeStructure {
     public float radius() {
         Float r = radiusCache;
         if (r == null) {
-            Vector3f c = center();
+            Vec3 c = center();
             float max = 0f;
             for (Atom a : atoms) {
-                Vector3f p = a.position();
+                Vec3 p = a.position();
                 float dx = p.x() - c.x();
                 float dy = p.y() - c.y();
                 float dz = p.z() - c.z();
-                float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz) + a.element().radius();
+                float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz) + a.element()
+                    .radius();
                 if (dist > max) max = dist;
             }
             radiusCache = r = max;
@@ -72,10 +74,48 @@ public final class MoleculeStructure {
         return r;
     }
 
-    public record Atom(AtomElement element, Vector3f position) {
+    public static final class Atom {
+
+        private final AtomElement element;
+        private final Vec3 position;
+
+        public Atom(AtomElement element, Vec3 position) {
+            this.element = element;
+            this.position = position;
+        }
+
+        public AtomElement element() {
+            return element;
+        }
+
+        public Vec3 position() {
+            return position;
+        }
     }
 
-    public record Bond(int from, int to, BondType type) {
+    public static final class Bond {
+
+        private final int from;
+        private final int to;
+        private final BondType type;
+
+        public Bond(int from, int to, BondType type) {
+            this.from = from;
+            this.to = to;
+            this.type = type;
+        }
+
+        public int from() {
+            return from;
+        }
+
+        public int to() {
+            return to;
+        }
+
+        public BondType type() {
+            return type;
+        }
     }
 
     public static Builder builder(String id, String formula) {
@@ -83,10 +123,11 @@ public final class MoleculeStructure {
     }
 
     public static final class Builder {
+
         private final String id;
         private final String formula;
-        private final List<Atom> atoms = new ArrayList<>();
-        private final List<Bond> bonds = new ArrayList<>();
+        private final List<Atom> atoms = new ArrayList<Atom>();
+        private final List<Bond> bonds = new ArrayList<Bond>();
 
         private Builder(String id, String formula) {
             this.id = id;
@@ -94,13 +135,18 @@ public final class MoleculeStructure {
         }
 
         public int addAtom(AtomElement element, float x, float y, float z) {
-            atoms.add(new Atom(element, new Vector3f(x, y, z)));
+            atoms.add(new Atom(element, new Vec3(x, y, z)));
             return atoms.size() - 1;
         }
 
         public float[] peekPosition(int idx) {
             Atom a = atoms.get(idx);
-            return new float[]{a.position().x(), a.position().y(), a.position().z()};
+            return new float[] { a.position()
+                .x(),
+                a.position()
+                    .y(),
+                a.position()
+                    .z() };
         }
 
         public Builder bond(int from, int to) {
@@ -115,11 +161,17 @@ public final class MoleculeStructure {
 
         public Builder autoBond() {
             for (int i = 0; i < atoms.size(); i++) {
-                Vector3f pi = atoms.get(i).position();
-                float ri = atoms.get(i).element().radius();
+                Vec3 pi = atoms.get(i)
+                    .position();
+                float ri = atoms.get(i)
+                    .element()
+                    .radius();
                 for (int j = i + 1; j < atoms.size(); j++) {
-                    Vector3f pj = atoms.get(j).position();
-                    float rj = atoms.get(j).element().radius();
+                    Vec3 pj = atoms.get(j)
+                        .position();
+                    float rj = atoms.get(j)
+                        .element()
+                        .radius();
                     float dx = pi.x() - pj.x(), dy = pi.y() - pj.y(), dz = pi.z() - pj.z();
                     float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
                     if (dist < (ri + rj) * 1.3f) {
@@ -131,7 +183,7 @@ public final class MoleculeStructure {
         }
 
         public MoleculeStructure build() {
-            return new MoleculeStructure(id, formula, List.copyOf(atoms), List.copyOf(bonds));
+            return new MoleculeStructure(id, formula, atoms, bonds);
         }
     }
 }

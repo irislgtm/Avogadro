@@ -1,6 +1,7 @@
 package com.trifectumsoftware.avogadro.molecule;
 
 public enum BondType {
+
     SINGLE(1, 0.15f),
     DOUBLE(2, 0.15f),
     TRIPLE(3, 0.15f),

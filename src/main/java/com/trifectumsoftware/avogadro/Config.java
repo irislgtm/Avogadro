@@ -1,19 +1,53 @@
 package com.trifectumsoftware.avogadro;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import java.io.File;
+
+import net.minecraftforge.common.config.Configuration;
 
 public class Config {
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ModConfigSpec.BooleanValue ENABLE_TOOLTIPS = BUILDER.define("enableTooltips", true);
+    public static boolean enableTooltips = true;
+    public static int tooltipSize = 64;
+    public static float spinSeconds = 6.0f;
+    public static boolean neiCategory = true;
+    public static boolean cubicAtoms = false;
 
-    public static final ModConfigSpec.IntValue TOOLTIP_SIZE = BUILDER.defineInRange("tooltipSize", 64, 16, 128);
+    public static void synchronizeConfiguration(File configFile) {
+        Configuration configuration = new Configuration(configFile);
 
-    public static final ModConfigSpec.DoubleValue SPIN_SECONDS = BUILDER.defineInRange("spinSeconds", 6.0, 0.5, 60.0);
+        enableTooltips = configuration.getBoolean(
+            "enableTooltips",
+            Configuration.CATEGORY_GENERAL,
+            enableTooltips,
+            "Render a molecule model tooltip for items that map to a molecule.");
 
-    public static final ModConfigSpec.BooleanValue JEI_CATEGORY = BUILDER.define("jeiCategory", true);
+        tooltipSize = configuration.getInt(
+            "tooltipSize",
+            Configuration.CATEGORY_GENERAL,
+            tooltipSize,
+            16,
+            128,
+            "Size in pixels of the rendered molecule model.");
 
-    public static final ModConfigSpec.BooleanValue CUBIC_ATOMS = BUILDER.define("cubicAtoms", false);
+        spinSeconds = configuration.getFloat(
+            "spinSeconds",
+            Configuration.CATEGORY_GENERAL,
+            spinSeconds,
+            0.5f,
+            60.0f,
+            "Seconds per full rotation of the molecule model.");
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+        neiCategory = configuration
+            .getBoolean("neiCategory", Configuration.CATEGORY_GENERAL, neiCategory, "Add a Molecules category to NEI.");
+
+        cubicAtoms = configuration.getBoolean(
+            "cubicAtoms",
+            Configuration.CATEGORY_GENERAL,
+            cubicAtoms,
+            "Draw atoms as cubes instead of spheres.");
+
+        if (configuration.hasChanged()) {
+            configuration.save();
+        }
+    }
 }

@@ -1,0 +1,5 @@
+{
+  "smiles": "O",
+  "items": ["minecraft:water_bucket", "minecraft:ice", "minecraft:packed_ice", "minecraft:snowball", "minecraft:snow"],
+  "fluids": ["water", "flowing_water"]
+}

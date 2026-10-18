@@ -1,6 +1,6 @@
 package com.trifectumsoftware.avogadro.molecule;
 
-public record AtomElement(String symbol, int color, float radius) {
+public final class AtomElement {
 
     public static final AtomElement HYDROGEN = new AtomElement("H", 0xFFFFFFFF, 0.25f);
     public static final AtomElement CARBON = new AtomElement("C", 0xFF3A3A3A, 0.40f);
@@ -44,50 +44,71 @@ public record AtomElement(String symbol, int color, float radius) {
     public static final AtomElement NEON = new AtomElement("Ne", 0xFFB3E3F5, 0.34f);
     public static final AtomElement XENON = new AtomElement("Xe", 0xFF429EB0, 0.44f);
 
+    private final String symbol;
+    private final int color;
+    private final float radius;
+
+    public AtomElement(String symbol, int color, float radius) {
+        this.symbol = symbol;
+        this.color = color;
+        this.radius = radius;
+    }
+
+    public String symbol() {
+        return symbol;
+    }
+
+    public int color() {
+        return color;
+    }
+
+    public float radius() {
+        return radius;
+    }
+
     public static AtomElement bySymbol(String s) {
-        return switch (s) {
-            case "H" -> HYDROGEN;
-            case "C" -> CARBON;
-            case "N" -> NITROGEN;
-            case "O" -> OXYGEN;
-            case "F" -> FLUORINE;
-            case "Cl" -> CHLORINE;
-            case "Br" -> BROMINE;
-            case "I" -> IODINE;
-            case "S" -> SULFUR;
-            case "Se" -> SELENIUM;
-            case "P" -> PHOSPHORUS;
-            case "B" -> BORON;
-            case "Si" -> SILICON;
-            case "Na" -> SODIUM;
-            case "K" -> POTASSIUM;
-            case "Li" -> LITHIUM;
-            case "Ca" -> CALCIUM;
-            case "Mg" -> MAGNESIUM;
-            case "Al" -> ALUMINIUM;
-            case "Fe" -> IRON;
-            case "Cu" -> COPPER;
-            case "Zn" -> ZINC;
-            case "Sn" -> TIN;
-            case "Pb" -> LEAD;
-            case "Ag" -> SILVER;
-            case "Au" -> GOLD;
-            case "Mn" -> MANGANESE;
-            case "Cr" -> CHROMIUM;
-            case "Ni" -> NICKEL;
-            case "Co" -> COBALT;
-            case "Ti" -> TITANIUM;
-            case "W" -> TUNGSTEN;
-            case "Os" -> OSMIUM;
-            case "U" -> URANIUM;
-            case "Pu" -> PLUTONIUM;
-            case "Po" -> POLONIUM;
-            case "Ar" -> ARGON;
-            case "Kr" -> KRYPTON;
-            case "He" -> HELIUM;
-            case "Ne" -> NEON;
-            case "Xe" -> XENON;
-            default -> new AtomElement(s, 0xFFFF88FF, 0.35f);
-        };
+        if (s == null) return new AtomElement("?", 0xFFFF88FF, 0.35f);
+        if ("H".equals(s)) return HYDROGEN;
+        if ("C".equals(s)) return CARBON;
+        if ("N".equals(s)) return NITROGEN;
+        if ("O".equals(s)) return OXYGEN;
+        if ("F".equals(s)) return FLUORINE;
+        if ("Cl".equals(s)) return CHLORINE;
+        if ("Br".equals(s)) return BROMINE;
+        if ("I".equals(s)) return IODINE;
+        if ("S".equals(s)) return SULFUR;
+        if ("Se".equals(s)) return SELENIUM;
+        if ("P".equals(s)) return PHOSPHORUS;
+        if ("B".equals(s)) return BORON;
+        if ("Si".equals(s)) return SILICON;
+        if ("Na".equals(s)) return SODIUM;
+        if ("K".equals(s)) return POTASSIUM;
+        if ("Li".equals(s)) return LITHIUM;
+        if ("Ca".equals(s)) return CALCIUM;
+        if ("Mg".equals(s)) return MAGNESIUM;
+        if ("Al".equals(s)) return ALUMINIUM;
+        if ("Fe".equals(s)) return IRON;
+        if ("Cu".equals(s)) return COPPER;
+        if ("Zn".equals(s)) return ZINC;
+        if ("Sn".equals(s)) return TIN;
+        if ("Pb".equals(s)) return LEAD;
+        if ("Ag".equals(s)) return SILVER;
+        if ("Au".equals(s)) return GOLD;
+        if ("Mn".equals(s)) return MANGANESE;
+        if ("Cr".equals(s)) return CHROMIUM;
+        if ("Ni".equals(s)) return NICKEL;
+        if ("Co".equals(s)) return COBALT;
+        if ("Ti".equals(s)) return TITANIUM;
+        if ("W".equals(s)) return TUNGSTEN;
+        if ("Os".equals(s)) return OSMIUM;
+        if ("U".equals(s)) return URANIUM;
+        if ("Pu".equals(s)) return PLUTONIUM;
+        if ("Po".equals(s)) return POLONIUM;
+        if ("Ar".equals(s)) return ARGON;
+        if ("Kr".equals(s)) return KRYPTON;
+        if ("He".equals(s)) return HELIUM;
+        if ("Ne".equals(s)) return NEON;
+        if ("Xe".equals(s)) return XENON;
+        return new AtomElement(s, 0xFFFF88FF, 0.35f);
     }
 }
