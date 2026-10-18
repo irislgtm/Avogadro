@@ -1,6 +1,7 @@
-package com.trifectumsoftware.avogadro.client;
+package com.trifectumsoftware.avogadro.client.tooltip;
 
 import com.trifectumsoftware.avogadro.Config;
+import com.trifectumsoftware.avogadro.client.render.MoleculeRenderer;
 import com.trifectumsoftware.avogadro.molecule.MoleculeDef;
 import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 import net.minecraft.client.gui.Font;

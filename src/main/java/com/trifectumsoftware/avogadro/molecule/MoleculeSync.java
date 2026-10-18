@@ -42,6 +42,6 @@ public record MoleculeSync(Map<ResourceLocation, String> entries) implements Cus
     }
 
     public static void handle(MoleculeSync message, IPayloadContext context) {
-        context.enqueueWork(() -> com.trifectumsoftware.avogadro.client.MoleculeClientStore.applyServerJson(message.entries()));
+        context.enqueueWork(() -> com.trifectumsoftware.avogadro.client.ClientMoleculeStore.applyServerJson(message.entries()));
     }
 }

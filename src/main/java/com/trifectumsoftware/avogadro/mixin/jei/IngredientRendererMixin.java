@@ -1,6 +1,6 @@
 package com.trifectumsoftware.avogadro.mixin.jei;
 
-import com.trifectumsoftware.avogadro.client.MoleculeTooltip;
+import com.trifectumsoftware.avogadro.client.tooltip.MoleculeTooltip;
 import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.ingredients.IIngredientRenderer;

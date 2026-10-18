@@ -1,6 +1,8 @@
 package com.trifectumsoftware.avogadro.client;
 
 import com.trifectumsoftware.avogadro.Avogadro;
+import com.trifectumsoftware.avogadro.client.tooltip.ClientMoleculeTooltip;
+import com.trifectumsoftware.avogadro.client.tooltip.MoleculeTooltip;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,6 +22,6 @@ public final class AvogadroClientEvents {
 
     @SubscribeEvent
     public static void reloads(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener(new MoleculeAssets());
+        event.registerReloadListener(new ClientMoleculeLoader());
     }
 }
