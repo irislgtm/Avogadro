@@ -1,0 +1,9 @@
+{
+  "crystal": {
+    "lattice": "diamond",
+    "element": "C",
+    "cells": 2
+  },
+  "formula": "C",
+  "items": ["minecraft:diamond", "minecraft:diamond_block"]
+}

@@ -20,12 +20,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-/**
- * Client-side molecule registry. On 1.7.10 all data comes from the config directory, so there are no server/asset
- * layers to merge - {@link MoleculeConfigLoader} simply calls {@link #setAll(Map)}.
- */
 public final class MoleculeStore {
 
+    private static final Object LOCK = new Object();
+    private static final Map<String, MoleculeDef> CONFIG_DEFS = new LinkedHashMap<String, MoleculeDef>();
+    private static final Map<String, MoleculeDef> API_DEFS = new LinkedHashMap<String, MoleculeDef>();
     private static final Map<String, MoleculeDef> DEFS = new LinkedHashMap<String, MoleculeDef>();
     private static final Map<String, String> ITEM = new HashMap<String, String>();
     private static final Map<String, String> ITEM_ORE = new HashMap<String, String>();
@@ -35,20 +34,60 @@ public final class MoleculeStore {
     private MoleculeStore() {}
 
     public static MoleculeDef get(String id) {
-        return DEFS.get(id);
+        synchronized (LOCK) {
+            return DEFS.get(id);
+        }
     }
 
     public static Collection<MoleculeDef> all() {
-        return Collections.unmodifiableList(new ArrayList<MoleculeDef>(DEFS.values()));
+        synchronized (LOCK) {
+            return Collections.unmodifiableList(new ArrayList<MoleculeDef>(DEFS.values()));
+        }
     }
 
     public static void setAll(Map<String, MoleculeDef> defs) {
+        synchronized (LOCK) {
+            CONFIG_DEFS.clear();
+            CONFIG_DEFS.putAll(defs);
+            rebuildDefs();
+        }
+    }
+
+    private static void rebuildDefs() {
         DEFS.clear();
+        DEFS.putAll(CONFIG_DEFS);
+        DEFS.putAll(API_DEFS);
+        rebuildIndexes();
+    }
+
+    public static MoleculeDef registerApi(MoleculeDef def) {
+        if (def == null || def.id() == null
+            || def.id()
+                .isEmpty()
+            || def.structure() == null) {
+            throw new IllegalArgumentException("Molecule definitions need an id and a structure");
+        }
+        synchronized (LOCK) {
+            API_DEFS.put(def.id(), def);
+            rebuildDefs();
+            return def;
+        }
+    }
+
+    public static MoleculeDef unregisterApi(String id) {
+        synchronized (LOCK) {
+            MoleculeDef removed = API_DEFS.remove(id);
+            if (removed == null) return null;
+            rebuildDefs();
+            return removed;
+        }
+    }
+
+    private static void rebuildIndexes() {
         ITEM.clear();
         ITEM_ORE.clear();
         FLUID.clear();
         BY_PATH.clear();
-        DEFS.putAll(defs);
         for (Map.Entry<String, MoleculeDef> e : DEFS.entrySet()) {
             MoleculeDef d = e.getValue();
             for (String s : d.items()) {
@@ -64,47 +103,49 @@ public final class MoleculeStore {
         }
     }
 
-    /** Resolves an item stack to a molecule id, following the same priority order as the 1.20.1 build. */
     public static String lookup(ItemStack stack) {
         if (stack == null || stack.getItem() == null) return null;
         Object nameObj = Item.itemRegistry.getNameForObject(stack.getItem());
         if (nameObj == null) return null;
         String key = nameObj.toString();
-        String direct = ITEM.get(key);
-        if (direct != null) return direct;
+        synchronized (LOCK) {
+            String direct = ITEM.get(key);
+            if (direct != null) return direct;
 
-        int[] oreIds = OreDictionary.getOreIDs(stack);
-        for (int id : oreIds) {
-            String hit = ITEM_ORE.get(OreDictionary.getOreName(id));
-            if (hit != null) return hit;
-        }
+            int[] oreIds = OreDictionary.getOreIDs(stack);
+            for (int id : oreIds) {
+                String hit = ITEM_ORE.get(OreDictionary.getOreName(id));
+                if (hit != null) return hit;
+            }
 
-        Item item = stack.getItem();
-        if (item instanceof IFluidContainerItem) {
-            FluidStack inside = ((IFluidContainerItem) item).getFluid(stack);
-            if (inside != null) {
-                String hit = lookup(inside);
-                if (hit != null) {
-                    MoleculeDef def = DEFS.get(hit);
-                    if (def != null && def.matchContainers()) return hit;
+            Item item = stack.getItem();
+            if (item instanceof IFluidContainerItem) {
+                FluidStack inside = ((IFluidContainerItem) item).getFluid(stack);
+                if (inside != null) {
+                    String hit = lookup(inside);
+                    if (hit != null) {
+                        MoleculeDef def = DEFS.get(hit);
+                        if (def != null && def.matchContainers()) return hit;
+                    }
                 }
             }
+            return BY_PATH.get(path(key));
         }
-        return BY_PATH.get(path(key));
     }
 
-    /** Resolves a fluid stack to a molecule id. 1.7.10 fluid names are not namespaced, so compare by path. */
     public static String lookup(FluidStack stack) {
         if (stack == null || stack.getFluid() == null) return null;
         Fluid fluid = stack.getFluid();
         String name = fluid.getName();
         if (name == null) return null;
-        String direct = FLUID.get(name);
-        if (direct != null) return direct;
-        String p = path(name);
-        direct = FLUID.get(p);
-        if (direct != null) return direct;
-        return BY_PATH.get(p);
+        synchronized (LOCK) {
+            String direct = FLUID.get(name);
+            if (direct != null) return direct;
+            String p = path(name);
+            direct = FLUID.get(p);
+            if (direct != null) return direct;
+            return BY_PATH.get(p);
+        }
     }
 
     private static String path(String id) {
@@ -152,6 +193,7 @@ public final class MoleculeStore {
                 String baseId = o.get("copy")
                     .getAsString();
                 MoleculeDef base = known.get(baseId);
+                if (base == null) base = get(baseId);
                 if (base == null) return null;
                 structure = base.structure();
                 if (formula == null) formula = base.formula();
@@ -177,6 +219,45 @@ public final class MoleculeStore {
                     id,
                     o.get("smiles")
                         .getAsString());
+                if (formula == null) formula = hill(structure);
+            } else if (o.has("fullerene")) {
+                JsonElement fullerene = o.get("fullerene");
+                int carbons = fullerene.isJsonPrimitive() ? fullerene.getAsInt()
+                    : fullerene.getAsJsonObject()
+                        .get("carbons")
+                        .getAsInt();
+                structure = MoleculeGenerators.fullerene(id, carbons);
+                if (formula == null) formula = hill(structure);
+            } else if (o.has("nanotube")) {
+                JsonObject nanotube = o.getAsJsonObject("nanotube");
+                structure = MoleculeGenerators.nanotube(
+                    id,
+                    nanotube.get("n")
+                        .getAsInt(),
+                    nanotube.get("m")
+                        .getAsInt(),
+                    nanotube.has("cells") ? nanotube.get("cells")
+                        .getAsInt() : 3);
+                if (formula == null) formula = hill(structure);
+            } else if (o.has("crystal")) {
+                JsonObject crystal = o.getAsJsonObject("crystal");
+                List<String> elements = strings(crystal, "elements");
+                if (elements.isEmpty() && crystal.has("element")
+                    && crystal.get("element")
+                        .isJsonPrimitive()) {
+                    elements.add(
+                        crystal.get("element")
+                            .getAsString());
+                }
+                structure = MoleculeGenerators.crystal(
+                    id,
+                    crystal.get("lattice")
+                        .getAsString(),
+                    elements,
+                    crystal.has("cells") ? crystal.get("cells")
+                        .getAsInt() : 2,
+                    crystal.has("layers") ? crystal.get("layers")
+                        .getAsInt() : 2);
                 if (formula == null) formula = hill(structure);
             } else {
                 return null;
@@ -253,7 +334,7 @@ public final class MoleculeStore {
         return BondType.SINGLE;
     }
 
-    private static String hill(MoleculeStructure mol) {
+    public static String hill(MoleculeStructure mol) {
         Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         for (MoleculeStructure.Atom a : mol.atoms()) {
             Integer cur = counts.get(

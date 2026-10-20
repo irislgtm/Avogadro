@@ -122,6 +122,10 @@ public final class MoleculeStructure {
         return new Builder(id, formula);
     }
 
+    public static Builder builder(String id) {
+        return new Builder(id, null);
+    }
+
     public static final class Builder {
 
         private final String id;
@@ -137,6 +141,16 @@ public final class MoleculeStructure {
         public int addAtom(AtomElement element, float x, float y, float z) {
             atoms.add(new Atom(element, new Vec3(x, y, z)));
             return atoms.size() - 1;
+        }
+
+        public Builder atom(AtomElement element, float x, float y, float z) {
+            addAtom(element, x, y, z);
+            return this;
+        }
+
+        public Builder atom(String element, float x, float y, float z) {
+            addAtom(AtomElement.bySymbol(element), x, y, z);
+            return this;
         }
 
         public float[] peekPosition(int idx) {

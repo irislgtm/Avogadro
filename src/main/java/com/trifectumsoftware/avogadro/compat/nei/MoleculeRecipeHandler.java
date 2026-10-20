@@ -3,6 +3,7 @@ package com.trifectumsoftware.avogadro.compat.nei;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
@@ -15,20 +16,19 @@ import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 
-/**
- * NEI category listing every configured molecule. Each "recipe" draws the spinning model plus the formula, and uses
- * one of the molecule's mapped items as the selectable result so that NEI can associate the entry with the item
- * panel and the R/U keybinds.
- */
 public class MoleculeRecipeHandler extends TemplateRecipeHandler {
 
     public static final String ID = "avogadro:molecules";
 
-    private static final int MODEL_X = 4;
-    private static final int MODEL_Y = 3;
+    private static final int MODEL_X = 8;
+    private static final int MODEL_Y = 8;
     private static final int MODEL_SIZE = 58;
-    private static final int RESULT_X = 150;
-    private static final int RESULT_Y = 46;
+    private static final int TEXT_X = MODEL_X + MODEL_SIZE + 8;
+    private static final int TEXT_Y = MODEL_Y;
+    private static final int SLOT_X = TEXT_X;
+    private static final int SLOT_Y = TEXT_Y + 32;
+    private static final int CYCLE_TICKS = 40;
+    private static final int TEXT_WIDTH = 166 - TEXT_X - 4;
 
     @Override
     public String getHandlerId() {
@@ -60,59 +60,56 @@ public class MoleculeRecipeHandler extends TemplateRecipeHandler {
         Minecraft mc = Minecraft.getMinecraft();
         String formula = def.formula();
         if (formula != null && !formula.isEmpty()) {
-            mc.fontRenderer.drawStringWithShadow(formula, MODEL_X + MODEL_SIZE + 8, MODEL_Y + 3, 0xFFFFFF);
+            mc.fontRenderer.drawString(trim(mc.fontRenderer, formula, TEXT_WIDTH), TEXT_X, TEXT_Y, 0x000000);
         }
-        mc.fontRenderer.drawStringWithShadow(def.id(), MODEL_X + MODEL_SIZE + 8, MODEL_Y + 15, 0xA0A0A0);
-
-        List<PositionedStack> ingredients = arecipes.get(recipe)
-            .getIngredients();
-        int x = MODEL_X + MODEL_SIZE + 8;
-        for (int i = 0; i < ingredients.size() && i < 4; i++) {
-            PositionedStack stack = ingredients.get(i);
-            mc.fontRenderer.drawStringWithShadow(shortName(stack), x, MODEL_Y + 30 + i * 10, 0x808080);
-        }
+        mc.fontRenderer
+            .drawString(trim(mc.fontRenderer, displayId(def.id()), TEXT_WIDTH), TEXT_X, TEXT_Y + 12, 0x000000);
     }
 
-    private static String shortName(PositionedStack stack) {
-        if (stack == null || stack.item == null) return "";
-        Item item = stack.item.getItem();
-        String name = String.valueOf(Item.itemRegistry.getNameForObject(item));
-        return name;
+    private static String displayId(String id) {
+        if (id == null) return "";
+        int colon = id.indexOf(':');
+        return colon >= 0 && colon + 1 < id.length() ? id.substring(colon + 1) : id;
+    }
+
+    private static String trim(FontRenderer font, String text, int maxWidth) {
+        if (text == null || text.isEmpty()) return "";
+        if (font.getStringWidth(text) <= maxWidth) return text;
+        String ellipsis = "...";
+        int available = maxWidth - font.getStringWidth(ellipsis);
+        if (available <= 0) return font.trimStringToWidth(text, maxWidth);
+        return font.trimStringToWidth(text, available) + ellipsis;
     }
 
     public class CachedMolecule extends CachedRecipe {
 
         final MoleculeDef def;
-        private final PositionedStack result;
-        private final List<PositionedStack> ingredients;
+        private final List<PositionedStack> slots;
 
-        CachedMolecule(MoleculeDef def, ItemStack result, List<PositionedStack> ingredients) {
+        CachedMolecule(MoleculeDef def, List<PositionedStack> slots) {
             this.def = def;
-            this.result = result == null ? null : new PositionedStack(result, RESULT_X, RESULT_Y);
-            this.ingredients = ingredients;
+            this.slots = slots;
         }
 
         @Override
         public PositionedStack getResult() {
-            return result;
+            if (slots.isEmpty()) return null;
+            return slots.get((cycleticks / CYCLE_TICKS) % slots.size());
         }
 
         @Override
         public List<PositionedStack> getIngredients() {
-            return ingredients;
+            return java.util.Collections.emptyList();
         }
     }
 
     private void add(MoleculeDef def) {
         List<ItemStack> stacks = mapped(def);
-        if (stacks.isEmpty()) return;
-
-        List<PositionedStack> ingredients = new java.util.ArrayList<PositionedStack>();
-        int x = MODEL_X + MODEL_SIZE + 8;
-        for (int i = 1; i < stacks.size() && i <= 4; i++) {
-            ingredients.add(new PositionedStack(stacks.get(i), x, MODEL_Y + 26 + (i - 1) * 10));
+        List<PositionedStack> slots = new java.util.ArrayList<PositionedStack>(stacks.size());
+        for (ItemStack stack : stacks) {
+            slots.add(new PositionedStack(stack, SLOT_X, SLOT_Y));
         }
-        arecipes.add(new CachedMolecule(def, stacks.get(0), ingredients));
+        arecipes.add(new CachedMolecule(def, slots));
     }
 
     private void addAll() {

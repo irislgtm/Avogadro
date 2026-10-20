@@ -1,5 +1,6 @@
 package com.trifectumsoftware.avogadro;
 
+import com.trifectumsoftware.avogadro.compat.top.TopCompatibility;
 import com.trifectumsoftware.avogadro.molecule.MoleculeConfigLoader;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -10,6 +11,7 @@ public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
         MoleculeConfigLoader.load(event.getModConfigurationDirectory());
+        TopCompatibility.register();
     }
 
     public void init(FMLInitializationEvent event) {}

@@ -3,7 +3,7 @@ package com.trifectumsoftware.avogadro.molecule;
 public final class AtomElement {
 
     public static final AtomElement HYDROGEN = new AtomElement("H", 0xFFFFFFFF, 0.25f);
-    public static final AtomElement CARBON = new AtomElement("C", 0xFF3A3A3A, 0.40f);
+    public static final AtomElement CARBON = new AtomElement("C", 0xFF555555, 0.40f);
     public static final AtomElement NITROGEN = new AtomElement("N", 0xFF3050F8, 0.35f);
     public static final AtomElement OXYGEN = new AtomElement("O", 0xFFE63333, 0.35f);
     public static final AtomElement FLUORINE = new AtomElement("F", 0xFF90E050, 0.30f);

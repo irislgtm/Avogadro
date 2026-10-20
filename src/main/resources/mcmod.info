@@ -3,7 +3,7 @@
 	"modList": [{
 		"modid": "${modId}",
 		"name": "${modName}",
-		"description": "Shows a molecule's structure and formula on item, fluid and material tooltips.",
+		"description": "Shows a molecule's structure and formula on item, fluid and material tooltips, in NEI, and in WAILA/HWYLA and The One Probe overlays.",
 		"version": "${modVersion}",
 		"mcversion": "${minecraftVersion}",
 		"url": "https://github.com/irislgtm/Avogadro",

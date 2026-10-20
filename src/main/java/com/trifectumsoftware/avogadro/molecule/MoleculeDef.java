@@ -1,11 +1,9 @@
 package com.trifectumsoftware.avogadro.molecule;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * A single molecule definition. On 1.7.10 molecule ids are plain strings ("avogadro:benzene") since
- * {@code ResourceLocation} there has a very different API.
- */
 public final class MoleculeDef {
 
     private final String id;
@@ -24,12 +22,30 @@ public final class MoleculeDef {
         this.id = id;
         this.structure = structure;
         this.formula = formula;
-        this.items = items;
-        this.itemTags = itemTags;
-        this.fluids = fluids;
-        this.fluidTags = fluidTags;
-        this.materials = materials;
+        this.items = copy(items);
+        this.itemTags = copy(itemTags);
+        this.fluids = copy(fluids);
+        this.fluidTags = copy(fluidTags);
+        this.materials = copy(materials);
         this.matchContainers = matchContainers;
+    }
+
+    public MoleculeDef(String id, MoleculeStructure structure, String formula) {
+        this(
+            id,
+            structure,
+            formula,
+            Collections.<String>emptyList(),
+            Collections.<String>emptyList(),
+            Collections.<String>emptyList(),
+            Collections.<String>emptyList(),
+            Collections.<String>emptyList(),
+            true);
+    }
+
+    private static List<String> copy(List<String> in) {
+        if (in == null || in.isEmpty()) return Collections.emptyList();
+        return Collections.unmodifiableList(new ArrayList<String>(in));
     }
 
     public String id() {
@@ -66,5 +82,10 @@ public final class MoleculeDef {
 
     public boolean matchContainers() {
         return matchContainers;
+    }
+
+    @Override
+    public String toString() {
+        return "MoleculeDef{" + id + '}';
     }
 }

@@ -5,15 +5,13 @@ import com.trifectumsoftware.avogadro.Tags;
 
 import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
+import codechicken.nei.guihook.GuiContainerManager;
 
-/**
- * NEI entry point. NEI discovers implementations of {@link IConfigureNEI} whose class name starts with "NEI" and ends
- * with "Config", so this class is deliberately named to match.
- */
 public class NEIAvogadroConfig implements IConfigureNEI {
 
     @Override
     public void loadConfig() {
+        GuiContainerManager.addTooltipHandler(new NeiMoleculeTooltipHandler());
         if (!Config.neiCategory) return;
         MoleculeRecipeHandler handler = new MoleculeRecipeHandler();
         API.registerRecipeHandler(handler);

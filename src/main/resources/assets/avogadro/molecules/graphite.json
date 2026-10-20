@@ -1,0 +1,9 @@
+{
+  "crystal": {
+    "lattice": "graphite",
+    "element": "C",
+    "cells": 4,
+    "layers": 2
+  },
+  "formula": "C"
+}

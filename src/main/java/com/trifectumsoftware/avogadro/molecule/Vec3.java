@@ -1,8 +1,5 @@
 package com.trifectumsoftware.avogadro.molecule;
 
-/**
- * Minimal immutable 3-component vector. Replaces JOML's Vector3f, which is not available on 1.7.10.
- */
 public final class Vec3 {
 
     private final float x;

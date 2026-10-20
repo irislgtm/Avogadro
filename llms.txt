@@ -1,9 +1,11 @@
 # Avogadro — llms.txt
 
-Avogadro is a standalone Minecraft 1.7.10 (Forge) library mod with no other
-dependencies. It renders spinning 3D ball-and-stick molecules in item tooltips
-and in a NEI "Molecules" recipe category. Any modpack can add molecules for any
-item or fluid without writing code.
+Avogadro is a standalone Minecraft 1.7.10 (Forge) library mod with no required
+dependencies. It renders spinning 3D ball-and-stick molecules in item tooltips,
+in a NEI "Molecules" recipe category, and in WAILA/HWYLA and The One Probe
+overlays when those mods are installed. Any modpack can add molecules for any
+item or fluid without writing code, and other mods can register them through the
+Java API.
 
 ## Where molecule files live
 
@@ -11,8 +13,10 @@ One source only: the client config directory.
 
 `config/avogadro/molecules/<name>.json` -> molecule id `avogadro:<name>`
 
-There are no datapacks, resource packs or server sync on 1.7.10. If the
-directory does not exist yet it is created and seeded with the bundled default
+There are no datapacks, resource packs or server sync on 1.7.10. The directory
+is created when missing and any missing bundled defaults are written on startup;
+existing files are never overwritten. Bundled defaults include `c60`,
+`diamond`, `graphene`, `graphite` and `nanotube_10_10` alongside the small
 molecules. Files are read once at startup; restart the game after editing.
 
 Invalid files are skipped silently.
@@ -53,6 +57,24 @@ Field reference:
   `[from, to]` or `[from, to, type]` with 0-based atom indices. Type is
   "SINGLE" (default), "DOUBLE", "TRIPLE", "QUADRUPLE", or 1/2/3/4, or one of
   -=#. Omit `bonds` to auto-bond atoms closer than 1.3x their summed radii.
+- `fullerene`: buckminsterfullerene. `60` or `{"carbons": 60}`. Only C60 is
+  currently generated. The hydrogen-free C60 formula is computed automatically.
+- `nanotube`: finite single-walled carbon nanotube, for example
+  `{"n": 10, "m": 10, "cells": 3}`. `n`/`m` are the chiral indices and
+  `cells` is the number of translational unit cells along the axis. The
+  circumference is seamless; the tube ends are open and not capped.
+- `crystal`: finite crystal cluster. For example
+  `{"lattice": "diamond", "element": "C", "cells": 2}`. Supported lattices:
+  `diamond`, `graphite` (use `layers` for the layer count), `graphene` (a
+  single graphite layer), `simple` / `simple_cubic`, `bcc`, `fcc`, and
+  `rock_salt` / `nacl` (use `"elements": ["Na", "Cl"]`). `cells` is the number
+  of conventional unit cells per axis. Atoms are bonded to nearest neighbours
+  only.
+- Geometry source precedence: `copy` > `atoms` > `smiles` > `fullerene` >
+  `nanotube` > `crystal`. Use only one unless you intentionally want the
+  higher-priority source to win.
+- Structures are capped at 2048 atoms to keep the tooltip renderer usable.
+  A larger generator request is skipped as invalid.
 - `formula`: display string shown in the tooltip and in NEI. Omit to
   auto-compute Hill order (C, then H, then alphabetical) with Unicode
   subscripts, e.g. H2O renders as H + subscript 2 + O.
@@ -86,12 +108,60 @@ Field reference:
 
 Fluid hovers start at the fluid step.
 
+## Java API
+
+Mods can register definitions from code with
+`com.trifectumsoftware.avogadro.api.AvogadroAPI`. API definitions are merged
+with the config files and win when the ids collide; they also survive a config
+reload. Register from the client proxy on 1.7.10 because the registry is
+client-side.
+
+```java
+MoleculeDef acetone = AvogadroAPI.builder("mymod:acetone")
+    .smiles("CC(=O)C")
+    .item("mymod:acetone_bottle")
+    .fluid("acetone")
+    .register();
+```
+
+`MoleculeBuilder` supports `smiles`, `fullerene`, `nanotube`, `crystal`,
+`structure`, `formula`, `copy`, `item`, `items`, `itemTag`, `itemTags`,
+`fluid`, `fluids`, `fluidTag`, `fluidTags`, `material`, `materials`,
+`matchContainers`, `build`, and `register`.
+`AvogadroAPI` exposes `register`, `unregister`, `get`, `molecules`, `forItem`,
+and `forFluid`. A `MoleculeDef` can also be constructed directly with
+`MoleculeStructure` and passed to `register`.
+
+## WAILA, HWYLA, The One Probe
+
+WAILA and HWYLA receive the formula and a spinning model through their tooltip
+renderer API. The provider is registered through WAILA's IMC hook, so it is only
+loaded when WAILA is installed. The One Probe and The One Smeagle are supported
+through a reflection bridge that registers a provider and a custom element; the
+bridge is dormant on 1.7.10 because TOP does not publish a 1.7.10 build.
+
+HEI (Had Enough Items) is the 1.12.2 JEI fork and cannot be loaded on 1.7.10.
+The NEI category is the 1.7.10 recipe-viewer integration; a future 1.12.2 build
+can consume the same `AvogadroAPI.molecules()` data from a JEI/HEI plugin.
+
+## Geometry cache
+
+Spheres, cubes, and bond cylinders are generated once per molecule and cached
+as a precomputed triangle/colour list. Rendering only applies the placement and
+spin transform, so no trigonometry or lighting math runs per frame. Large
+structures automatically use a lower sphere/cylinder tessellation so nanotubes
+and crystal clusters stay affordable. The cache is warmed during client
+post-init for the configured atom style (`cubicAtoms`) and falls back to lazy
+building if a molecule is registered later.
+
 ## Config (config/avogadro.cfg)
 
 - `enableTooltips`: show molecules in tooltips. Default true.
 - `tooltipSize`: molecule box in pixels, 16-128. Default 64.
 - `spinSeconds`: seconds per full rotation, 0.5-60. Default 6.0.
 - `neiCategory`: register the NEI Molecules category. Default true.
+- `wailaCompat`: show molecules in the WAILA/HWYLA block overlay. Default true.
+- `wailaSize`: molecule model size in the WAILA/HWYLA overlay, 16-64. Default 32.
 - `cubicAtoms`: render atoms as cubes and bonds as square sticks instead of
   spheres and tubes. Default false.
 
@@ -101,12 +171,82 @@ Fluid hovers start at the fluid step.
   line is added through `ItemTooltipEvent` and the model is drawn inside the
   vanilla tooltip box by a mixin on `GuiScreen.drawHoveringText`.
 - The Molecules category lists every configured molecule with its formula,
-  its id and up to four representative bound items. Press U on a bound item to
-  find it.
+  its id and a single slot that cycles through every bound item. Press U on a
+  bound item to find it.
 - Category contents are read at NEI startup, so restart after editing config
   molecule files.
 
 ## Minimal examples
+
+C60 buckminsterfullerene (60 atoms, 90 bonds) and a (10,0) zigzag nanotube:
+
+```json
+{
+  "fullerene": 60
+}
+```
+
+```json
+{
+  "nanotube": {
+    "n": 10,
+    "m": 0,
+    "cells": 4
+  }
+}
+```
+
+Diamond lattice for the diamond item, and a two-layer graphite cluster:
+
+```json
+{
+  "crystal": {
+    "lattice": "diamond",
+    "element": "C",
+    "cells": 2
+  },
+  "formula": "C",
+  "items": ["minecraft:diamond", "minecraft:diamond_block"]
+}
+```
+
+```json
+{
+  "crystal": {
+    "lattice": "graphite",
+    "element": "C",
+    "cells": 3,
+    "layers": 2
+  },
+  "formula": "C"
+}
+```
+
+A single graphene sheet (the same generator with one layer):
+
+```json
+{
+  "crystal": {
+    "lattice": "graphene",
+    "element": "C",
+    "cells": 4
+  },
+  "formula": "C"
+}
+```
+
+Rock salt (NaCl):
+
+```json
+{
+  "crystal": {
+    "lattice": "rock_salt",
+    "elements": ["Na", "Cl"],
+    "cells": 2
+  },
+  "formula": "NaCl"
+}
+```
 
 Bind an existing shape to your items (config/avogadro/molecules/acetone.json):
 

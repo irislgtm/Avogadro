@@ -10,6 +10,8 @@ public class Config {
     public static int tooltipSize = 64;
     public static float spinSeconds = 6.0f;
     public static boolean neiCategory = true;
+    public static boolean wailaCompat = true;
+    public static int wailaSize = 32;
     public static boolean cubicAtoms = false;
 
     public static void synchronizeConfiguration(File configFile) {
@@ -39,6 +41,20 @@ public class Config {
 
         neiCategory = configuration
             .getBoolean("neiCategory", Configuration.CATEGORY_GENERAL, neiCategory, "Add a Molecules category to NEI.");
+
+        wailaCompat = configuration.getBoolean(
+            "wailaCompat",
+            Configuration.CATEGORY_GENERAL,
+            wailaCompat,
+            "Show molecules in the WAILA/HWYLA block overlay.");
+
+        wailaSize = configuration.getInt(
+            "wailaSize",
+            Configuration.CATEGORY_GENERAL,
+            wailaSize,
+            16,
+            64,
+            "Size in pixels of the molecule model in the WAILA/HWYLA overlay.");
 
         cubicAtoms = configuration.getBoolean(
             "cubicAtoms",

@@ -2,6 +2,7 @@ package com.trifectumsoftware.avogadro.mixin;
 
 import java.util.List;
 
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,10 +15,11 @@ import com.trifectumsoftware.avogadro.client.tooltip.MoleculeTooltipOverlay;
 @Mixin(GuiScreen.class)
 public abstract class GuiScreenMixin {
 
-    // func_146283_a == GuiScreen.drawHoveringText(List, int, int). MCP ships no name for this member, so the SRG name
-    // is the one present in both the dev workspace and the reobfuscated jar.
-    @Inject(method = "func_146283_a(Ljava/util/List;II)V", at = @At("TAIL"))
-    private void avogadro$drawMoleculeModel(List<?> lines, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(
+        method = "drawHoveringText(Ljava/util/List;IILnet/minecraft/client/gui/FontRenderer;)V",
+        at = @At("TAIL"),
+        remap = false)
+    private void avogadro$drawMoleculeModel(List<?> lines, int mouseX, int mouseY, FontRenderer font, CallbackInfo ci) {
         MoleculeTooltipOverlay.draw(lines, mouseX, mouseY);
     }
 }

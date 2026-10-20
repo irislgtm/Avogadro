@@ -12,22 +12,37 @@ import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
-/**
- * Adds the molecule formula and enough blank filler lines to reserve room for the model, which is then drawn by
- * {@link MoleculeTooltipOverlay} from the {@code GuiScreen} mixin once the vanilla tooltip box has been laid out.
- */
 public final class MoleculeTooltips {
 
-    private static volatile String pending;
+    static final class Pending {
 
-    public static String takePending() {
-        String value = pending;
+        final String molecule;
+        final int fillerStart;
+        final int fillerRows;
+
+        Pending(String molecule, int fillerStart, int fillerRows) {
+            this.molecule = molecule;
+            this.fillerStart = fillerStart;
+            this.fillerRows = fillerRows;
+        }
+    }
+
+    private static volatile Pending pending;
+
+    static Pending takePending() {
+        Pending value = pending;
         pending = null;
         return value;
     }
 
+    public static void clearPending() {
+        pending = null;
+    }
+
     @SubscribeEvent
     public void onItemTooltip(ItemTooltipEvent event) {
+
+        pending = null;
         if (!Config.enableTooltips) return;
 
         String hit = MoleculeStore.lookup(event.itemStack);
@@ -37,8 +52,6 @@ public final class MoleculeTooltips {
 
         List<String> lines = event.toolTip;
         if (lines == null || lines.isEmpty()) return;
-
-        pending = hit;
 
         String formula = def.formula();
         if (formula != null && !formula.isEmpty()) {
@@ -51,9 +64,11 @@ public final class MoleculeTooltips {
 
         int rows = (int) Math.ceil(size / 10.0);
         String spacer = spacer(font, size + 2);
+        int start = lines.size();
         for (int i = 0; i < rows; i++) {
             lines.add(spacer);
         }
+        pending = new Pending(hit, start, rows);
     }
 
     private static String spacer(FontRenderer font, int minWidth) {
