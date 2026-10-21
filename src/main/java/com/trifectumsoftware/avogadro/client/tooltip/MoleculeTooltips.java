@@ -10,6 +10,7 @@ import com.trifectumsoftware.avogadro.Config;
 import com.trifectumsoftware.avogadro.molecule.MoleculeDef;
 import com.trifectumsoftware.avogadro.molecule.MoleculeStore;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public final class MoleculeTooltips {
@@ -27,6 +28,7 @@ public final class MoleculeTooltips {
         }
     }
 
+    private static final boolean CHROMATIC = Loader.isModLoaded("chromatictooltips");
     private static volatile Pending pending;
 
     static Pending takePending() {
@@ -56,6 +58,11 @@ public final class MoleculeTooltips {
         String formula = def.formula();
         if (formula != null && !formula.isEmpty()) {
             lines.add(formula);
+        }
+
+        if (CHROMATIC) {
+            pending = null;
+            return;
         }
 
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;

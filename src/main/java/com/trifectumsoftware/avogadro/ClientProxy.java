@@ -3,6 +3,7 @@ package com.trifectumsoftware.avogadro;
 import net.minecraftforge.common.MinecraftForge;
 
 import com.trifectumsoftware.avogadro.client.render.MoleculeRenderer;
+import com.trifectumsoftware.avogadro.client.tooltip.ChromaticMoleculeOverlay;
 import com.trifectumsoftware.avogadro.client.tooltip.MoleculeTooltips;
 import com.trifectumsoftware.avogadro.compat.ntm.NtmCompat;
 
@@ -20,6 +21,9 @@ public class ClientProxy extends CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
         MinecraftForge.EVENT_BUS.register(new MoleculeTooltips());
+        if (Config.enableTooltips && Loader.isModLoaded("chromatictooltips")) {
+            MinecraftForge.EVENT_BUS.register(new ChromaticMoleculeOverlay());
+        }
 
         if (Config.wailaCompat) {
             FMLInterModComms.sendMessage("Waila", "register", WAILA_PROVIDER);

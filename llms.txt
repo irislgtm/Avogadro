@@ -149,6 +149,10 @@ items such as `crystal_schrabidium` or `crystal_trixite` resolve by their item
 name suffix. Materials with no known composition are skipped rather than
 rendered with a random shape.
 
+When Chromatic Tooltips is installed, Avogadro uses its tooltip context and
+draws the molecule in a separate panel instead of reserving blank tooltip
+lines, so custom tooltip layouts stay compact.
+
 Set `ntmCompat` to false to disable all of it. NTM is a compile-time and
 development-runtime dependency only and is not bundled.
 
