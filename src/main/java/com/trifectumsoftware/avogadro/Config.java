@@ -12,6 +12,7 @@ public class Config {
     public static boolean neiCategory = true;
     public static boolean wailaCompat = true;
     public static int wailaSize = 32;
+    public static boolean ntmCompat = true;
     public static boolean cubicAtoms = false;
 
     public static void synchronizeConfiguration(File configFile) {
@@ -55,6 +56,12 @@ public class Config {
             16,
             64,
             "Size in pixels of the molecule model in the WAILA/HWYLA overlay.");
+
+        ntmCompat = configuration.getBoolean(
+            "ntmCompat",
+            Configuration.CATEGORY_GENERAL,
+            ntmCompat,
+            "Generate proper molecules for HBM's Nuclear Tech Mod materials and fluids.");
 
         cubicAtoms = configuration.getBoolean(
             "cubicAtoms",

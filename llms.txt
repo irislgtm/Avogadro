@@ -132,6 +132,26 @@ MoleculeDef acetone = AvogadroAPI.builder("mymod:acetone")
 and `forFluid`. A `MoleculeDef` can also be constructed directly with
 `MoleculeStructure` and passed to `register`.
 
+## HBM's Nuclear Tech Mod (soft compat)
+
+When NTM is installed, Avogadro creates molecules for NTM's material and fluid
+registries. Pure elements use their real element colours, radii and a matching
+crystal lattice; alloys and compounds use compositions derived from NTM's
+crucible, rotary furnace and electrolysis recipes; polymers use molecular
+structures. Fictional materials keep NTM's own colours and a formula that
+reflects their known constituents instead of a generic cluster.
+
+NTM petrochemicals and industrial fluids are covered as well: refinery
+fractions, aromatics, unsaturateds, syngas, acids, gases and polymer feedstocks
+use representative hydrocarbon mixtures, molecular structures or formulae.
+Fluid icons and NTM fluid containers resolve through NTM's fluid registry, and
+items such as `crystal_schrabidium` or `crystal_trixite` resolve by their item
+name suffix. Materials with no known composition are skipped rather than
+rendered with a random shape.
+
+Set `ntmCompat` to false to disable all of it. NTM is a compile-time and
+development-runtime dependency only and is not bundled.
+
 ## WAILA, HWYLA, The One Probe
 
 WAILA and HWYLA receive the formula and a spinning model through their tooltip
@@ -162,6 +182,8 @@ building if a molecule is registered later.
 - `neiCategory`: register the NEI Molecules category. Default true.
 - `wailaCompat`: show molecules in the WAILA/HWYLA block overlay. Default true.
 - `wailaSize`: molecule model size in the WAILA/HWYLA overlay, 16-64. Default 32.
+- `ntmCompat`: generate proper molecules for HBM's Nuclear Tech Mod materials,
+  fluids and crystal items. Default true.
 - `cubicAtoms`: render atoms as cubes and bonds as square sticks instead of
   spheres and tubes. Default false.
 

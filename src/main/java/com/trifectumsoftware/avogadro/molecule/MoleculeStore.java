@@ -19,6 +19,10 @@ import net.minecraftforge.oredict.OreDictionary;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.trifectumsoftware.avogadro.Config;
+import com.trifectumsoftware.avogadro.compat.ntm.NtmCompat;
+
+import cpw.mods.fml.common.Loader;
 
 public final class MoleculeStore {
 
@@ -128,6 +132,10 @@ public final class MoleculeStore {
                         if (def != null && def.matchContainers()) return hit;
                     }
                 }
+            }
+            if (Loader.isModLoaded("hbm") && Config.ntmCompat) {
+                String ntm = NtmCompat.lookup(stack);
+                if (ntm != null) return ntm;
             }
             return BY_PATH.get(path(key));
         }

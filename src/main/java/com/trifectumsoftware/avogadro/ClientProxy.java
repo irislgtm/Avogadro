@@ -4,7 +4,9 @@ import net.minecraftforge.common.MinecraftForge;
 
 import com.trifectumsoftware.avogadro.client.render.MoleculeRenderer;
 import com.trifectumsoftware.avogadro.client.tooltip.MoleculeTooltips;
+import com.trifectumsoftware.avogadro.compat.ntm.NtmCompat;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -34,6 +36,9 @@ public class ClientProxy extends CommonProxy {
     public void postInit(FMLPostInitializationEvent event) {
         super.postInit(event);
 
+        if (Config.ntmCompat && Loader.isModLoaded("hbm")) {
+            NtmCompat.register();
+        }
         MoleculeRenderer.precomputeAll();
     }
 }
