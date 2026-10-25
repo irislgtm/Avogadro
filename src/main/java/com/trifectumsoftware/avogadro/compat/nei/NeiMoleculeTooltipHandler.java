@@ -2,6 +2,7 @@ package com.trifectumsoftware.avogadro.compat.nei;
 
 import java.awt.Dimension;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,21 @@ import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.guihook.IContainerTooltipHandler;
 
 public final class NeiMoleculeTooltipHandler implements IContainerTooltipHandler {
+
+    @Override
+    public List<String> handleTooltip(GuiContainer gui, int mousex, int mousey, List<String> currenttip) {
+        return currenttip;
+    }
+
+    @Override
+    public List<String> handleItemDisplayName(GuiContainer gui, ItemStack itemStack, List<String> currenttip) {
+        return currenttip;
+    }
+
+    @Override
+    public Map<String, String> handleHotkeys(GuiContainer gui, int mousex, int mousey, Map<String, String> hotkeys) {
+        return hotkeys;
+    }
 
     @Override
     public List<String> handleItemTooltip(GuiContainer gui, ItemStack itemStack, int mousex, int mousey,
